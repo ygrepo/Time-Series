@@ -1,0 +1,245 @@
+\documentclass{article}
+
+\usepackage{times}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage[psamsfonts]{amssymb}
+\usepackage{latexsym}
+\usepackage{color}
+\usepackage{graphics}
+\usepackage{enumerate}
+\usepackage{amstext}
+\usepackage{blkarray}
+\usepackage{url}
+\usepackage{epsfig}
+\usepackage{bm}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=blue,
+}
+\usepackage{mathtools}
+ 
+\def\Kset{\mathbb{K}}
+\def\Nset{\mathbb{N}}
+\def\Qset{\mathbb{Q}}
+\def\Rset{\mathbb{R}}
+\def\Sset{\mathbb{S}}
+\def\Zset{\mathbb{Z}}
+\def\squareforqed{\hbox{\rlap{$\sqcap$}$\sqcup$}}
+\def\qed{\ifmmode\squareforqed\else{\unskip\nobreak\hfil
+\penalty50\hskip1em\null\nobreak\hfil\squareforqed
+\parfillskip=0pt\finalhyphendemerits=0\endgraf}\fi}
+
+\DeclareMathOperator*{\E}{\rm E}
+\DeclareMathOperator*{\argmax}{\rm argmax}
+\DeclareMathOperator*{\argmin}{\rm argmin}
+\DeclareMathOperator{\sgn}{sign}
+\DeclareMathOperator{\supp}{supp}
+\DeclareMathOperator{\last}{last}
+\DeclareMathOperator{\sign}{\sgn}
+\DeclareMathOperator{\diag}{diag}
+\providecommand{\abs}[1]{\lvert#1\rvert}
+\providecommand{\norm}[1]{\lVert#1\rVert}
+\def\vcdim{\textnormal{VCdim}}
+\DeclareMathOperator*{\B}{\textbf{B}}
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+
+\newcommand{\cX}{{\mathcal X}}
+\newcommand{\cY}{{\mathcal Y}}
+\newcommand{\cA}{{\mathcal A}}
+\newcommand{\ignore}[1]{}
+\newcommand{\bi}{\begin{itemize}}
+\newcommand{\ei}{\end{itemize}}
+\newcommand{\be}{\begin{enumerate}}
+\newcommand{\ee}{\end{enumerate}}
+\newcommand{\bd}{\begin{description}}
+\newcommand{\ed}{\end{description}}
+\newcommand{\h}{\widehat}
+\newcommand{\e}{\epsilon}
+\newcommand{\mat}[1]{{\mathbf #1}}
+\newcommand{\R}{\mat{R}}
+\newcommand{\0}{\mat{0}}
+\newcommand{\M}{\mat{M}}
+\newcommand{\D}{\mat{D}}
+\renewcommand{\r}{\mat{r}}
+\newcommand{\x}{\mat{x}}
+\renewcommand{\u}{\mat{u}}
+\renewcommand{\v}{\mat{v}}
+\newcommand{\w}{\mat{w}}
+\renewcommand{\H}{\text{0}}
+\newcommand{\T}{\text{1}}
+\newcommand{\set}[1]{\{#1\}}
+\newcommand{\xxi}{{\boldsymbol \xi}}
+\newcommand{\ssigma}{{\boldsymbol \sigma}}
+\newcommand{\Alpha}{{\boldsymbol \alpha}}
+\newcommand{\tts}{\tt \small}
+\newcommand{\hint}{\emph{hint}}
+\newcommand{\matr}[1]{\bm{#1}}     % ISO complying version
+\newcommand{\vect}[1]{\bm{#1}}     % ISO complying version
+
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\Cov}{\mathrm{Cov}}
+
+\renewcommand{\labelitemi}{$\bullet$}
+\renewcommand{\labelitemii}{$\cdot$}
+\renewcommand{\labelitemiii}{$\diamond$}
+\renewcommand{\labelitemiv}{$\ast$}
+
+\newenvironment{solution}{\vspace{.25cm}\noindent{\it Solution:}}{}
+
+\begin{document}
+
+\noindent DS-GA 3001-001:\\
+Probabilistic Time Series Analysis, Fall 2019\\
+Homework Assignment 1 \\
+Yves Greatti - yg390\\
+%\href{https://www.overleaf.com/project/5c7316d634ff9f6576d02da0}{Read-Only Link to tex file}
+
+\begin{enumerate}
+	\item Consider the sample mean of a stationary time series $x_t$, defined as:
+	\[
+		\hat{\mu} = \frac{1}{T}\sum_t x_t
+	\]
+	Compute the variance of this estimate $\Var{(\hat{\mu})}$ ,as a function of T , and the autocovariance function $\gamma(h)$.
+	By definition for a stationary time series, $\gamma(h)=\Cov{(x_{t+h}, x_t)}$ and by linearity of the covariance:
+	\begin{align*}
+		\Var{(\hat{\mu})}	&= \Var{(\frac{1}{T}\sum_t x_t)} = \frac{1} {T^2} \Var{(\sum_t x_t, \sum_s x_s)} \\
+						&= \frac{1} {T^2} \big(T \gamma_x(0) + (T-1) \gamma_x(1) + (T-2) \gamma_x(2) + \cdots +  \gamma_x(T-1) + \\
+						& (T-1)  \gamma_x(-1) +  (T-2) \gamma_x(-2) + \cdots +  \gamma_x(1-T) \big ) \\
+						&= \frac{1} {T} \sum_{h=-T}^T \big ( 1 - \frac{|h|}{T} \big) \gamma_x(h)
+	\end{align*}
+	
+	\item Confidence bounds for the autocorrelation function: show that the variance of the empirical ACF for white noise with variance $\sigma^2$ given T data points is $\frac{1}{T}$.
+	By Theorem A.7 from ts4.pdf, asymptotic variance of the empirical ACF of stationary process, for T large, is given by:
+	\[
+	\begin{pmatrix}
+		\begin{pmatrix}
+    			\hat{\rho}(1) \\ \hat{\rho}(2)  \\ \vdots \\  \hat{\rho}(h)
+		\end{pmatrix}
+		\approx \text{AN}
+		\begin{pmatrix}
+			\begin{pmatrix}
+    				\rho(1) \\ \rho(2)  \\ \vdots \\  \rho(h)
+			\end{pmatrix}
+			,
+			T^{-1} \matr{W}
+		\end{pmatrix}
+	\end{pmatrix}
+	\]
+	where: $$W_{pq} = \sum_{u=1}^\infty [\rho(u+p) + \rho(u-p) -2 \rho(p) \rho(u)] \times [\rho(u+q) + \rho(u-q) -2 \rho(q) \rho(u)] $$
+	
+	Given a white noise with variance $\sigma^2$, $\rho(0)=1$, $\rho(h)=0 \text{ for $|h| > 0$ }$, then in the sum for $W_{pq}$, the only surviving term is $u = p = q$, i.e. $W_{pp}=1$, $W_{pq} = 0$ for $p \ne q$. 
+	Hence 
+	\[
+		\begin{pmatrix}
+    			\hat{\rho}(1) \\ \hat{\rho}(2)  \\ \vdots \\  \hat{\rho}(h)
+		\end{pmatrix}
+		\approx  \mathcal{N}(0,T^{-1} I)
+	\] and $\hat{\rho}(.) \approx \mathcal{N}(0,T^{-1})$.
+		
+	\item For an MA(1), $x_t = w_t + \theta w_{t-1}$ show that the autocorrelation function $|\rho_x(1)| \le 0.5$, for all $\theta$.
+	For which values $\theta$ is it maximum/minimum?
+	
+	\begin{solution}
+	The ACF is defined as:
+	\[
+		\rho_x(h) = \frac{\gamma_x(h)}{\gamma_x(0)}
+	\]
+	For h =1
+	\begin{align*}
+		\gamma_x(t+1, t) &= \Cov{(w_t + \theta w_{t-1},  w_{t+1} + \theta w_t)} \\
+						&=  \theta \cdot  \Cov{(w_t, w_t)}\\
+						&= \theta \sigma^2
+	\end{align*}
+	Since $w_t$ is a white noise with variance $\sigma$ and $\Cov{(w_s, w_t)}$ = 0 for $s \ne t$.
+	And for h=0
+	\begin{align*}
+		\gamma_x(t, t) &= \Cov{(w_t + \theta w_{t-1},  w_t + \theta w_{t-1})} \\
+						&=  \Cov{(w_t, w_t)} +  \Cov{(\theta w_{t-1}, \theta w_{t-1})}\\
+						&= \sigma^2 + \theta^2 \sigma^2 \\
+						&= (1+\theta^2) \cdot \sigma^2
+	\end{align*}
+	Thus $\rho_x(1) = \frac{\theta}{(1+\theta^2)}$, $(\theta -1)^2 \ge 0 \Rightarrow  \theta^2 -2 \theta + 1 \ge 0 \Rightarrow |\frac{\theta}{1+\theta^2}| \le \frac{1}{2} \Rightarrow |\rho_x(1)| \le 0.5$.
+	Let $f(x) = \frac{x}{1 + x^2}$ then $f'(x) = \frac{(1-x) (1+x)}{(1+x^2)^2}$ and $f'(x) = 0 \text{ for } x = 1 \text{ or } x =-1$. $f''(x) = 2 \frac{x (x^2-3)}{(1+x^2)^3}$  and $f''(1) = - \frac{1}{2} < 0$ and $f''(-1) = 1 > 0$.
+	$f(1) = f(-1) = \frac{1}{2}$ and $\theta=1$ and $\theta=-1$ are the global maximum and minimum. 
+	
+	\item Identify the following models as ARMA(p,q):
+	\begin{itemize}
+		\item $x_t = 0.8 x_{t-1} - 0.15 x_{t-2} + w_t - 0.3 w_{t-1}$
+		\item $x_t = x_{t-1} - 0.5 x_{t-2}  + w_t - w_{t-1}$
+	\end{itemize}	
+	
+	\bi
+		\item[(a)] Using backshift operator $\B$, we can rewrite the first model as:
+		$(1 - 0.8 \B + 0.15 \textbf{B}^{2}) x_t = (1 -0.3 \B) w_t$
+		The roots of the polynomial $\Theta(x) = 1 - 0.8 x + 0.15 x^2$ are $\theta_1 =2$ and $\theta_2=\frac{1}{0.3}$.
+		$\Rightarrow \Theta(x) = \frac{1}{0.3} (\B-2) (0.3 \B-1)$. After simplification this is a ARMA(1,0) or AR(1) model.
+
+		\item[(b)] Similarly we can rewrite the second model as:
+		$(1-\B + 0.5 \textbf{B}^2) x_t = (1-\B) w_t$, setting $\Theta(x) = 1 -x + 0.5 x^2$ we have:
+		\begin{align*}
+			\Theta(x)  &= \frac{1}{2} (x^2 -2 x +2) \\
+					&= \frac{1}{2}  (x -x_1) (x-x_2) \text{ where } x_1 = 1 -i \text{ and } x_2 = 1+ i
+		\end{align*}		
+		There are no simplifications on the left or right sides of the model and no parameters are redundant therefore this model is an ARMA(2,1).
+		
+	\ei
+	
+	\item  Having observed a sequence  $\{x_1,x_2... x_t \}$ we are trying to predict a future observation $x_{t+h}$, with $h\geq1$.
+	How well / far can one predict into the future if the data comes from a a) MA(3) and b) AR(1) model. \\
+	\emph{Hint: think of the functional form of the optimal estimator and/or the corresponding graphical model.}\\
+
+	We have seen in class that forecasting consists in determining the parameters of the model, and from there the autocovariance function 
+	for different lags, and then the autocorrelation function, to end with the covariance matrix of the model. 
+	With the covariance matrix known, we can use it to make inference (forecasting).
+	
+	The autocovariance function of  a MA(q) process is $\gamma(h) = \sigma^2 \sum_{i=0}^{q-h} \theta_i \theta_{i+h}$ for $h=1,\cdots,q$ and $\gamma(h)=0$ for $h>q$
+	where $\theta_0=1$. That means that a future prediction $x_{\tau}$ is correlated at most by the last three observed samples $\{ x_{\tau-3}, x_{\tau-2}, x_{\tau-1} \}$. 
+	This result can be observed when plotting the ACF of the MA(3) process, on which you can see that at most 3 spikes are non-zero. With an optimal estimator of a MA(3) process, we
+	can forecast up to 3 out-of sample periods.
+	\begin{center}
+		\includegraphics[width=1\linewidth]{problem5_1.png} 
+	\end{center}
+	
+	In the case of a AR(p) such as a AR(1) process $x_t = \theta x_{t-1} + w_t$, the PACF identifies the order of the process. The corresponding graphical model shows that  $x_t$, is conditionally depending 
+	on $x_{t-1}$ and $w_t$. A numerical plots of empirical PACF of three AR(1), AR(2) and AR(3) processes, confirms that only one spike is different than zero for a AR(1), two pikes for a AR(2) and three spikes for a AR(3) process.
+	So for a AR(1) process we can forecast up to one-step ahead.
+	
+	\begin{center}
+		\includegraphics[width=1\linewidth]{problem5_2.png} 
+	\end{center}
+
+	
+	\item Given the AR(2) process with $P(\B) = (1-0.2 \B) (1-0.5 \B)$, what is $\rho(h)$? Check your analytical solution against an empirical estimate using the code from the lab. 
+	The ACF of an AR(2) process is defined as:
+	\begin{align*}
+		x_t			&= \phi_1 x_{t-1} + \phi_2 x_{t-2} + w_t \\
+		\E{(x_t x_{t-h})}	&=  \phi_1 \E{(x_{t-1} x_{t-h})} + \phi_2 \E{(x_{t-2} x_{t-h})} + \E{(w_t   x_{t-h})}\\
+		\E{(w_t x_{t-h})}	&= \E{(w_t \sum_{j=0}^\infty \psi_j  w_{t-h-j}) = 0}  \Rightarrow \\	
+		\gamma(h) 	&= \phi_1 \gamma(h-1) + \phi_2  \gamma(h-2) \text{ for $h=1,2,\cdots$} \Rightarrow\\
+		\rho(h) 		&= \phi_1 \rho(h-1) +  \phi_2  \rho(h-2) \text{ by dividing by $\gamma(0)$}
+	\end{align*}
+	where we have used $\E{(w_t w_s)} = 0$ for $t \ne s$.		
+	In the given example, the AR(2) process is $x_t = \phi_1 x_{t-1} + \phi_2 x_{t-2} + w_t$ where $\phi_1 = 0.7$ and $\phi_2 = -0.1$.
+	When checking the analytical solution against empirical estimate for $\rho(1)$ and $\rho(2)$, we have
+	$\rho(0)=1$ and $\rho(h) = \rho(-h)$, applying the previous equality to $\rho(1)$, we obtain $\rho(1) = \phi_1 \rho(0) + \phi_2 \rho(1)$, and $\rho(2) = \phi_1 \rho(1) + \phi_2$:
+	\begin{align*}
+			\rho(1) 	&= \frac{\phi_1}{1-\phi_2} \\
+			\rho_2	&= \frac{\phi_1^2 + (1-\phi_2) \phi_2}{1-\phi_2}
+	\end{align*}
+	Using the code from the lab:
+	\begin{center}
+		\includegraphics[width=1\linewidth]{problem6_1.png} 
+	\end{center}
+	\begin{center}
+		\includegraphics[width=1\linewidth]{problem6_2.png} 
+	\end{center}
+	
+	\end{solution}
+\end{enumerate}
+
+\end{document}
