@@ -1,0 +1,63 @@
+\documentclass[12pt]{article}
+
+\usepackage[a4paper,margin=0.5in]{geometry}
+
+\usepackage[square,numbers,sort&compress]{natbib}
+%\usepackage[sort&compress]{natbib}
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+
+\usepackage{graphicx}
+\newcommand{\bigo}[1]{{\cal O}\left(#1 \right)}
+\newcommand{\p}[1]{\mathrm{P}\left(#1 \right)}
+\newcommand{\vect}[1]{\mathbf{#1}}
+\newcommand{\tr}{^\mathrm{t}}
+
+\begin{document}
+\thispagestyle{empty}
+\begin{center}
+
+\textbf{DS-GA 3001.001 Special Topics in Data Science: Modeling Time Series\\
+Homework 2}
+\end{center}
+
+$$
+  \Sigma_0 = \mathbb{E}[x_0, x_0^T] - mu_0 \mathbb{E}[x_0]^T
+                   - \mathbb{E}[x_0] mu_0^T + mu_0 mu_0^T
+$$  
+
+$$
+      A = ( \sum_{t=1}^{T-1} \mathbb{E}[x_t x_{t-1}^{T}]
+                - b_{t-1} \mathbb{E}[x_{t-1}]^T )
+             ( \sum_{t=1}^{T-1} \mathbb{E}[x_{t-1} x_{t-1}^T] )^{-1}
+$$
+$$
+      Q = \frac{1}{T-1} \sum_{t=0}^{T-2}
+                (\mathbb{E}[x_{t+1}] - A_t \mathbb{E}[x_t] - b_t)
+                    (\mathbb{E}[x_{t+1}] - A_t \mathbb{E}[x_t] - b_t)^T
+                + A_t Var(x_t) A_t^T + Var(x_{t+1})
+                - Cov(x_{t+1}, x_t) A_t^T - A_t Cov(x_t, x_{t+1})
+$$   
+$$     C = ( \sum_{t=0}^{T-1} (z_t - d_t) \mathbb{E}[x_t]^T )
+             ( \sum_{t=0}^{T-1} \mathbb{E}[x_t x_t^T] )^-1
+$$            
+             
+
+
+$$
+      R = \frac{1}{T} \sum_{t=0}^{T-1}
+                [z_t - C_t \mathbb{E}[x_t] - b_t]
+                    [z_t - C_t \mathbb{E}[x_t] - b_t]^T
+                + C_t Var(x_t) C_t^T
+$$                                 
+\end{document}

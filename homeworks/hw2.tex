@@ -1,0 +1,72 @@
+\documentclass[12pt]{article}
+
+\usepackage[a4paper,margin=0.5in]{geometry}
+
+\usepackage[square,numbers,sort&compress]{natbib}
+%\usepackage[sort&compress]{natbib}
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+
+\usepackage{graphicx}
+\newcommand{\bigo}[1]{{\cal O}\left(#1 \right)}
+\newcommand{\p}[1]{\mathrm{P}\left(#1 \right)}
+\newcommand{\vect}[1]{\mathbf{#1}}
+\newcommand{\tr}{^\mathrm{t}}
+
+\begin{document}
+\thispagestyle{empty}
+\begin{center}
+
+\textbf{DS-GA 3001.001 Special Topics in Data Science: Modeling Time Series\\
+Homework 2}
+\end{center}
+
+\noindent \textbf{Due date: Oct 11, by 6pm}\\
+
+\noindent \textbf{Problem 1.} LDS model, 10p \\ %10
+Consider a special case of LDS with $\vect{C} = \vect{I}$ and  $\vect{R} = \sigma^2 \vect{I}$, where $\vect{I}$ denotes the identity matrix. 
+Show that in the limit where there is no observation noise the best estimate for latent $\vect{z}_i$ is to simply use the observation $\vect{x}_i$: 
+formally, in the limit when $\sigma^2 \rightarrow 0$ the posterior for $\vect{z}_i$ has mean $\vect{x}_i$ and vanishing variance.\\
+
+\noindent \textbf{Problem 2. } LDS prediction, 10p \\%20
+Given the standard parametrization of the LDS model, and the Kalman filtering estimates $\mu_{i|i}$ and $\Sigma_{i|i}$, obtained for a dataset $\vect{x}_{1:t}$ write down the expressions 
+for predicting the following 2 observations in the sequence $\vect{x}_{t+1}$ and  $\vect{x}_{t+2}$.\\
+
+ 
+\noindent \textbf{Problem 3.} LDS inference with missing observations, 10p \\%20
+Consider a variation of the original LDS graphical model with one single missing value $\mathbf{x}_j$. Everything else is as in the original; the only difference is that the graphical model loses the downward observation arrow and the corresponding $\mathbf{x}_j$.)
+How do the Kalman filtering/smoothing updates change?\\
+
+\noindent \textbf{Problem 4.}  LDS filtering, 10p\\ 
+Given the model parameters: $A = 
+\begin{bmatrix} %0.9 0.1; 0.3 0.7
+0.65 &   0.3\\
+    0.2   & 0.8
+\end{bmatrix}
+$,
+$C= 
+\begin{bmatrix}  
+    1.1 & 0.2\\
+    0.5 & 0.95\\
+\end{bmatrix},\\
+$
+$Q= 0.1 \vect{I}_2$, 
+$R= 0.01 \vect{I}_2$ with initial condition parameters $\mu_0 = [0\; 0]^\mathrm{t}$, $\Sigma_0 = 0.5 \vect{I}$.
+Generate 25 samples from the model and  plot them. Use these observation for inference (filtering and smoothing). How much does the Kalman gain $\mathbf{K}_i$, and $\mathbf{F}_i$ vary across timepoints? Try playing around with the parameters. Does the result change? Discuss.\\
+Note: you can use code from the lab as starting point, if you want. Not need to submit the code, only your figures.
+\\
+
+\noindent \textbf{Problem 5 }  Particle filtering, 10p\\%20
+Consider the usual LDS model, but where inference is done using particle filtering instead of the traditional Kalman filter. Write down pseudocode for the particle updates. Given the generated samples, $\{\mathbf{z}_i^{(k)}\}_{k=1:K, i=1:t}$, how would you go about computing the quantities $\mu_{i|i}$, $\Sigma_{i|i}$ and $\mathbb{E}[\mathbf{z}_i \mathbf{z}_{i+1}^t]$?\\
+Hint: Use the general form from the lecture, and plug in the expressions for the different probabilities of the LDS model. The mean and variance can be written as expectations and approximated accordingly.
+\end{document}
