@@ -61,6 +61,18 @@ Homework 2}
 Consider a special case of LDS with $\vect{C} = \vect{I}$ and  $\vect{R} = \sigma^2 \vect{I}$, where $\vect{I}$ denotes the identity matrix. 
 Show that in the limit where there is no observation noise the best estimate for latent $\vect{z}_i$ is to simply use the observation $\vect{x}_i$: 
 formally, in the limit when $\sigma^2 \rightarrow 0$ the posterior for $\vect{z}_i$ has mean $\vect{x}_i$ and vanishing variance.\\
+Given the LDS model specifications for the posterior $\vect{z}_i$:
+\begin{align*}
+	\mu_{i|i}		&= 	\mu_{i|i-1} + \matr{K}_i (\vect{x}_i - \matr{C} \mu_{i|i-1}) \\
+	\Sigma_{i|i}	&=	\Sigma_{i|i-1} - \matr{K}_i 	 \matr{C}  \Sigma_{i|i-1}
+\end{align*}
+where $ \matr{K}_i = \Sigma_{i|i-1}	 \matr{C} ^T ( \matr{C} \Sigma_{i|i-1}  \matr{C} ^T + \matr{R})^{-1}$. If $\vect{C} = \vect{I}$ and  $\vect{R} = \sigma^2 \vect{I}$, then the Kalman gain becomes
+ $ \matr{K}_i = \frac{\Sigma_{i|i-1}} {\Sigma_{i|i-1} + \sigma^2 \vect{I}} $, taking the limit  $\sigma^2 \rightarrow 0$ then $ \matr{K}_i \rightarrow \vect{I}$, thus in the limit the posterior $\vect{z}_i$ has for parameters:
+\begin{align*}
+	\mu_{i|i}		&= 	\mu_{i|i-1} + (\vect{x}_i - \mu_{i|i-1})  = \vect{x}_i \\
+	\Sigma_{i|i}	&=	\Sigma_{i|i-1} -  \Sigma_{i|i-1} = \vect{0}
+\end{align*}
+
 
 \noindent \textbf{Problem 2. } LDS prediction, 10p \\%20
 Given the standard parametrization of the LDS model, and the Kalman filtering estimates $\mu_{i|i}$ and $\Sigma_{i|i}$, obtained for a dataset $\vect{x}_{1:t}$ write down the expressions 
@@ -87,6 +99,13 @@ which is used to obtain the prediction  $\vect{x}_{t+2} \approx \mathcal{N} (\ma
 \noindent \textbf{Problem 3.} LDS inference with missing observations, 10p \\%20
 Consider a variation of the original LDS graphical model with one single missing value $\mathbf{x}_j$. Everything else is as in the original; the only difference is that the graphical model loses the downward observation arrow and the corresponding $\mathbf{x}_j$.)
 How do the Kalman filtering/smoothing updates change?\\
+During filtering the current state  $\vect{z}_{j+1}$ updated as a function of  $\vect{z}_{j}$ and the most recent observation $\vect{x}_{j-1}$ is:
+\begin{align*}
+	\mu_{j+1|j+1}	&= 	\mu_{j+1|j} - \matr{K}_{j+1}  \matr{C} \mu_{j+1|j} \\
+	\Sigma_{j+1|j+1}	&=	\Sigma_{j+1|j} - \matr{K}_{j+1} 	 \matr{C}  \Sigma_{j+1|j}
+\end{align*}
+where $ \matr{K}_{j+1} = \Sigma_{j+1|i}	 \matr{C} ^t ( \matr{C} \Sigma_{j+1|j}  \matr{C} ^t + \matr{R})^{-1}$.
+
 
 \noindent \textbf{Problem 4.}  LDS filtering, 10p\\ 
 Given the model parameters: $A = 
@@ -106,6 +125,36 @@ $R= 0.01 \vect{I}_2$ with initial condition parameters $\mu_0 = [0\; 0]^\mathrm{
 Generate 25 samples from the model and  plot them. Use these observation for inference (filtering and smoothing). How much does the Kalman gain $\mathbf{K}_i$, and $\mathbf{F}_i$ vary across timepoints? Try playing around with the parameters. Does the result change? Discuss.\\
 Note: you can use code from the lab as starting point, if you want. Not need to submit the code, only your figures.
 \\
+
+With the given parameters, using the code from the lab, the sampling of 25 observations gives us the plots below:
+\begin{center}
+	\includegraphics[width=1\linewidth]{figures/problem_4_1.png} 
+\end{center}
+
+After inference (filtering and smoothing) we obtain the estimates in red:
+\begin{center}
+	\includegraphics[width=1\linewidth]{figures/problem_4_2.png} 
+\end{center}
+
+At each time step, we compute the frobenius norm: $|\|A\|_{\mathrm{F}}=\sqrt{\sum_{i=1}^{m} \sum_{j=1}^{n}\left|a_{i j}\right|^{2}}=\sqrt{\operatorname{trace}\left(A^{*} A\right)}=\sqrt{\sum_{i=1}^{\min \{m, n\}} \sigma_{i}^{2}(A)}$ 
+of the Kalman gain and F matrices and we plot them. On the plots below, we can see that once established since the system is linear, the Kalman matrix does not change.
+\begin{center}
+	\includegraphics[width=1\linewidth]{figures/problem_4_3.png} 
+\end{center}
+
+Using now a smoother dynamic system, as described below, we vary different parameters and observe the results listed below:
+\begin{center}
+	\includegraphics[width=1\linewidth]{figures/problem_4_4.png} 
+\end{center}
+\begin{center}
+	\includegraphics[width=1\linewidth]{figures/problem_4_5.png} 
+\end{center}
+\begin{center}
+	\includegraphics[width=1\linewidth]{figures/problem_4_6.png} 
+\end{center}
+\begin{center}
+	\includegraphics[width=1\linewidth]{figures/problem_4_7.png} 
+\end{center}
 
 \noindent \textbf{Problem 5 }  Particle filtering, 10p\\%20
 Consider the usual LDS model, but where inference is done using particle filtering instead of the traditional Kalman filter. Write down pseudocode for the particle updates. Given the generated samples, $\{\mathbf{z}_i^{(k)}\}_{k=1:K, i=1:t}$, how would you go about computing the quantities $\mu_{i|i}$, $\Sigma_{i|i}$ and $\mathbb{E}[\mathbf{z}_i \mathbf{z}_{i+1}^t]$?\\
