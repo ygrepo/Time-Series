@@ -107,13 +107,16 @@ When the observation $\vect{x}_j$ is missing the update  $\vect{x}_j$ and the Ka
  \end{align*}
 And the smoothing equations are now:
 \begin{align*}
-			\mu_{j|t}		&=	\matr{A}  \mu_{j-1| j-1} + \matr{F}_j (\mu_{j+1|t}  - \mu_{j+1|j}) \\
+			\mu_{j|t}		&=	\matr{A}  \mu_{j-1| j-1} + \matr{F}_j (\mu_{j+1|t}  - \mu_{j+1|j}) = \matr{A} \mu_{j-1|j-1}  + \matr{F}_j (\mu_{j+1|t} - \matr{A} \mu_{j|j}) \\
 			\Sigma_{j|t}	&=	 \Sigma_{j|j}	+ \matr{F}_j (\Sigma_{j+1|t}  - \Sigma_{j+1|j})   \matr{F}_j^t \\
 			 \matr{F}_j		&= 	\Sigma_{j|j}	 \matr{A}^t  \Sigma_{j+1|j}^{-1}	= (\matr{A}  \Sigma_{j-1|j-1}  \matr{A}^t  +  \matr{Q} )	 \matr{A}^t   
-			 				(\matr{A}  \Sigma_{j|j}  \matr{A}^t  +  \matr{Q} )	
+			 				(\matr{A}  \Sigma_{j|j}  \matr{A}^t  +  \matr{Q} )^{-1}	
  \end{align*}
-We can recursively express $\Sigma_{j|j}$ in term of $\Sigma_{j-1|j-1}$ in both $\mu_{j|t}$ and $\Sigma_{j|t}$  until $\mu_0$ and $\Sigma_0$. 
-So $\mu_{j|t}$ and  $\Sigma_{j|t}$ are reduced to the exceptions of the terms $\mu_{j+1|t}$ and $\Sigma_{j+1|t}$,  to matrix multiplications of $\matr{A}$ , $ \matr{Q}$, $\mu_0$ and $\Sigma_0$.\\
+We can recursively express $\mu_{j+1|j}$ , $\Sigma_{j|j}$ in term of $\Sigma_{j-1|j-1}$ in both $\mu_{j|t}$ and $\Sigma_{j|t}$  up to $\mu_0$ and $\Sigma_0$. 
+So $\mu_{j|t}$ and  $\Sigma_{j|t}$ are reduced with the exceptions of the terms $\mu_{j+1|t}$ and $\Sigma_{j+1|t}$,  
+to matrix multiplications of $\matr{A}$ , $ \matr{Q}$, $\mu_0$ and $\Sigma_0$. 
+\\
+
 \noindent \textbf{Problem 4.}  LDS filtering, 10p\\ 
 Given the model parameters: $A = 
 \begin{bmatrix} %0.9 0.1; 0.3 0.7
