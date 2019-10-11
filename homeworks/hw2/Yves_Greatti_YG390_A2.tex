@@ -99,14 +99,21 @@ which is used to obtain the prediction  $\vect{x}_{t+2} \approx \mathcal{N} (\ma
 \noindent \textbf{Problem 3.} LDS inference with missing observations, 10p \\%20
 Consider a variation of the original LDS graphical model with one single missing value $\mathbf{x}_j$. Everything else is as in the original; the only difference is that the graphical model loses the downward observation arrow and the corresponding $\mathbf{x}_j$.)
 How do the Kalman filtering/smoothing updates change?\\
-During filtering the current state  $\vect{z}_{j+1}$ updated as a function of  $\vect{z}_{j}$ and the most recent observation $\vect{x}_{j-1}$ is:
+
+When the observation $\vect{x}_j$ is missing the update  $\vect{x}_j$ and the Kalman gain $\matr{K}_i$ are zero. Filtering equations become:
 \begin{align*}
-	\mu_{j+1|j+1}	&= 	\mu_{j+1|j} - \matr{K}_{j+1}  \matr{C} \mu_{j+1|j} \\
-	\Sigma_{j+1|j+1}	&=	\Sigma_{j+1|j} - \matr{K}_{j+1} 	 \matr{C}  \Sigma_{j+1|j}
-\end{align*}
-where $ \matr{K}_{j+1} = \Sigma_{j+1|i}	 \matr{C} ^t ( \matr{C} \Sigma_{j+1|j}  \matr{C} ^t + \matr{R})^{-1}$.
-
-
+			\mu_{j|j}		&= \mu_{j | j-1 }		= \matr{A}  \mu_{j-1| j-1} \\
+			\Sigma_{j|j}	&= \Sigma_{j|j-1}	=  \matr{A}  \Sigma_{j-1|j-1}  \matr{A}^t  +  \matr{Q} 
+ \end{align*}
+And the smoothing equations are now:
+\begin{align*}
+			\mu_{j|t}		&=	\matr{A}  \mu_{j-1| j-1} + \matr{F}_j (\mu_{j+1|t}  - \mu_{j+1|j}) \\
+			\Sigma_{j|t}	&=	 \Sigma_{j|j}	+ \matr{F}_j (\Sigma_{j+1|t}  - \Sigma_{j+1|j})   \matr{F}_j^t \\
+			 \matr{F}_j		&= 	\Sigma_{j|j}	 \matr{A}^t  \Sigma_{j+1|j}^{-1}	= (\matr{A}  \Sigma_{j-1|j-1}  \matr{A}^t  +  \matr{Q} )	 \matr{A}^t   
+			 				(\matr{A}  \Sigma_{j|j}  \matr{A}^t  +  \matr{Q} )	
+ \end{align*}
+We can recursively express $\Sigma_{j|j}$ in term of $\Sigma_{j-1|j-1}$ in both $\mu_{j|t}$ and $\Sigma_{j|t}$  until $\mu_0$ and $\Sigma_0$. 
+So $\mu_{j|t}$ and  $\Sigma_{j|t}$ are reduced to the exceptions of the terms $\mu_{j+1|t}$ and $\Sigma_{j+1|t}$,  to matrix multiplications of $\matr{A}$ , $ \matr{Q}$, $\mu_0$ and $\Sigma_0$.\\
 \noindent \textbf{Problem 4.}  LDS filtering, 10p\\ 
 Given the model parameters: $A = 
 \begin{bmatrix} %0.9 0.1; 0.3 0.7
@@ -136,13 +143,24 @@ After inference (filtering and smoothing) we obtain the estimates in red:
 	\includegraphics[width=1\linewidth]{figures/problem_4_2.png} 
 \end{center}
 
+At iteration $i$, Kalman gain is the matrix $\mathbf{K}_i = \Sigma_{i|i-1} \matr{C}^t (\matr{C} \Sigma_{i|i-1}\matr{C}^t  + \matr{R})^{-1}$ and the "smooth" gain $\mathbf{F}_i = 
+\Sigma_{i|i} \matr{A}^t \Sigma_{i+1|i}^{-1}$.
 At each time step, we compute the frobenius norm: $|\|A\|_{\mathrm{F}}=\sqrt{\sum_{i=1}^{m} \sum_{j=1}^{n}\left|a_{i j}\right|^{2}}=\sqrt{\operatorname{trace}\left(A^{*} A\right)}=\sqrt{\sum_{i=1}^{\min \{m, n\}} \sigma_{i}^{2}(A)}$ 
 of the Kalman gain and F matrices and we plot them. On the plots below, we can see that once established since the system is linear, the Kalman matrix does not change.
 \begin{center}
 	\includegraphics[width=1\linewidth]{figures/problem_4_3.png} 
 \end{center}
 
-Using now a smoother dynamic system, as described below, we vary different parameters and observe the results listed below:
+The intuition behind the Kalman gain are:
+\begin{enumerate}
+	\item The more noisy the measurement is, the less precise it is. Hence, the innovation that represents the bias in the measurement may not be real innovation but rather an artifact of the measurement noise. Noise or uncertainty is directly captured by variance. Thus the larger the measurement variance noise, the lower the Kalman gain should be.
+	\item The more noisy the process state is, the more important the innovation should be taken into account. Hence, the larger the process state variance, the larger the Kalman gain should be.
+Summarizing these two intuitions, we would expect the Kalman gain to be:
+\[
+	\matr{K}_i = \frac{ \text{Process Noise}}{ \text{Measurement Noise}}
+\]
+\end{enumerate}
+Using a smoother dynamic system, we confirm the intuition experimentally, as described below, we vary different parameters and observe the results listed below:
 \begin{center}
 	\includegraphics[width=1\linewidth]{figures/problem_4_4.png} 
 \end{center}
