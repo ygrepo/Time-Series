@@ -236,4 +236,23 @@ At this step we compute the prior on $\vect{z}_{i+1}$ using a 2-step sampling:
 	\end{algorithmic}
 \end{algorithm}
 
+Let compute $\mathbb{E}[\vect{z}_i \vect{z}_{i+1} | \vect{x}_{1:i+1} ]$.
+Using Bayes' rule:
+\begin{align*}
+	\mathbb{E}[\vect{z}_i \vect{z}_{i+1} | \vect{x}_{1:i+1} ]	&=	\sum_{\vect{z}_i, \vect{z}_{i+1}} \xi(\vect{z}_i, \vect{z}_{i+1}) \vect{z}_i \vect{z}_{i+1} \\
+	 \xi(\vect{z}_i, \vect{z}_{i+1})						&=	\p{\vect{z}_i, \vect{z}_{i+1} | \vect{x}_{1:i+1}} \\
+	 \p{\vect{z}_i, \vect{z}_{i+1} | \vect{x}_{1:i+1}}			&= 	\frac{ \p{\vect{x}_{1:i+1} | \vect{z}_i,\vect{z}_{i+1}}  \p{\vect{z}_i, \vect{z}_{i+1}} } {\p{\vect{x}_{1:i+1}}} \\
+	 \p{\vect{z}_i, \vect{z}_{i+1} | \vect{x}_{1:i+1}}			&= \frac{\p{\vect{x}_{1:i} | \vect{z}_i} \p{\vect{z}_i}  \p{\vect{z}_{i+1} | \vect{z}_i}  \p{\vect{x}_{i+1} | \vect{z}_{i+1} } } {\p{\vect{x}_{1:i+1}}}
+\end{align*}
+The numerator is constant and given by the distribution of the data. We want to determine $\p{\vect{x}_{1:i} | \vect{z}_i}$, $\p{\vect{z}_i}$, $\p{\vect{z}_{i+1} | \vect{z}_i}$ and $ \p{\vect{x}_{i+1} | \vect{z}_{i+1} }$.
+Starting with $\p{\vect{x}_{1:i} | \vect{z}_i}$, using Bayes' rule:
+\begin{align*}
+		\p{\vect{x}_{1:i} | \vect{z}_i}					&=	\frac{ \p{\vect{z}_i | \vect{x}_{1:i}} \p{\vect{x}_{1:i}} }		{\int  \p{\vect{x}_{1:i}} d \vect{x}_i} \\
+		\p{\vect{z}_i | \vect{x}_{1:i}}					&= \text{ unnormalized weights } \big( \sum_{l=1,K} \p{\vect{x}_i | \vect{z}_i^{(k)}} \big) \cdot w_i^{(k)} \\
+		\p{\vect{x}_{1:i}}, \int  \p{\vect{x}_{1:i}} d \vect{x}_i 	&= \text{ probability distributions given by the data } \\
+		\p{\vect{z}_i}								&\sim  \p{\vect{z}_i | \vect{x}_{1:i-1}} \text{ computed at step i of the particle filter algorithm }\\
+		 \p{\vect{z}_{i+1} | \vect{z}_i}  					&= \text{ probabilities computed above in the expressions of } \p{ \vect{z}_{i+1} | \vect{x}_{1:i} } \\
+		 \p{\vect{x}_{i+1} | \vect{z}_{i+1}} 				&= \text{ unnormalized weights } \big( \sum_{l=1,K} \p{\vect{x}_{i+1} | \vect{z}_{i+1}^{(k)}} \big) \cdot w_{i+1}^{(k)} 
+\end{align*}
+
 \end{document}
