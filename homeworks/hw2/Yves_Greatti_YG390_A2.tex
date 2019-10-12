@@ -96,16 +96,16 @@ With the updated  $\vect{z}_{t+1}$ we can compute the next prior $\vect{z}_{t + 
 \end{align*}
 which is used to obtain the prediction  $\vect{x}_{t+2} \approx \mathcal{N} (\matr{C} \mu_{i+2|i+1}, \matr{C} \Sigma_{i+2|i+1} \matr{C}^t + \matr{R} )$.
  
-\noindent \textbf{Problem 3.} LDS inference with missing observations, 10p \\%20
+\noindent \textbf{Problem 3.} LDS inference with missing observations, 10p \\
 Consider a variation of the original LDS graphical model with one single missing value $\mathbf{x}_j$. Everything else is as in the original; the only difference is that the graphical model loses the downward observation arrow and the corresponding $\mathbf{x}_j$.)
 How do the Kalman filtering/smoothing updates change?\\
 
-When the observation $\vect{x}_j$ is missing the update  $\vect{x}_j$ and the Kalman gain $\matr{K}_i$ are zero. Filtering equations become:
+When the observation $\vect{x}_j$ is missing the update  $\vect{x}_j$ and the Kalman gain $\matr{K}_j$ are zero. Filtering equations become:
 \begin{align*}
 			\mu_{j|j}		&= \mu_{j | j-1 }		= \matr{A}  \mu_{j-1| j-1} \\
 			\Sigma_{j|j}	&= \Sigma_{j|j-1}	=  \matr{A}  \Sigma_{j-1|j-1}  \matr{A}^t  +  \matr{Q} 
- \end{align*}
-And the smoothing equations are now:
+\end{align*}
+ And the smoothing equations are now:
 \begin{align*}
 			\mu_{j|t}		&=	\matr{A}  \mu_{j-1| j-1} + \matr{F}_j (\mu_{j+1|t}  - \mu_{j+1|j}) = \matr{A} \mu_{j-1|j-1}  + \matr{F}_j (\mu_{j+1|t} - \matr{A} \mu_{j|j}) \\
 			\Sigma_{j|t}	&=	 \Sigma_{j|j}	+ \matr{F}_j (\Sigma_{j+1|t}  - \Sigma_{j+1|j})   \matr{F}_j^t \\
@@ -180,4 +180,60 @@ Using a smoother dynamic system, we confirm the intuition experimentally, as des
 \noindent \textbf{Problem 5 }  Particle filtering, 10p\\%20
 Consider the usual LDS model, but where inference is done using particle filtering instead of the traditional Kalman filter. Write down pseudocode for the particle updates. Given the generated samples, $\{\mathbf{z}_i^{(k)}\}_{k=1:K, i=1:t}$, how would you go about computing the quantities $\mu_{i|i}$, $\Sigma_{i|i}$ and $\mathbb{E}[\mathbf{z}_i \mathbf{z}_{i+1}^t]$?\\
 Hint: Use the general form from the lecture, and plug in the expressions for the different probabilities of the LDS model. The mean and variance can be written as expectations and approximated accordingly.
+
+Assume we are given K samples from $\vect{z}_i^{(k)} \sim \p{\vect{z}_i | \vect{x}_{1:i-1}}$.
+
+For $i > 1$ similarly to the LDS  model, we start by computing the prior for $\vect{z}_i$:
+\begin{align*}
+			\mu_{i|i-1}		&=  \matr{A}  \mu_{i-1| i-1} \\
+			\Sigma_{i|i-1}	&=	\matr{A} \Sigma_{i-1|i-1}	\matr{A}^T + \matr{Q} 
+ \end{align*}
+and samples from $\mathcal{N}(\mu_{i|i-1}, \Sigma_{i|i-1})$ which gives us $\vect{z}_i^{(k)} \sim \p{\vect{z}_i | \vect{x}_{1:i-1}}$.
+We then project into the observational space, equivalent to the step ($\matr{C} \mu_{i|i-1}$, $\matr{C} \Sigma_{i|i-1} \matr{C}^t + \Sigma$) for the Kalman filter, and compute weights which incorporate the observations $\vect{x}_i$.
+\begin{align*}
+			w_i^{(k)} =\frac{ \p{ \vect{x}_i | \vect{z}_i^{(k}} } {\sum_{l=1,K} \p{\vect{x}_i | \vect{z}_i^{(k))} }}
+\end{align*}
+We have that:
+\begin{align*}
+	\mathbb{E}_{\vect{z}_i | \vect{x}_{1:i}}[\mathbf{z}_i]	&= 	\mu_{i|i} = \int  \vect{z}_i \p{\vect{z}_i | \vect{x}_{1:i}}   d \vect{z}_{i}  \\
+								 	&=	\int  \vect{z}_i \p{\vect{z}_i | \vect{x}_{1:i-1}, \vect{x}_i}   d \vect{z}_{i} \\
+									&= 	\int  \vect{z}_i  \frac{\p{\vect{x}_i | \vect{z}_i} \p{ \vect{z}_i | \vect{x}_{1:i-1}} d \vect{z}_{i} } { \int \p{\vect{x}_i | \vect{z}_i} \p{ \vect{z}_i | \vect{x}_{1:i-1}} d  \vect{x}_{i} \vect{z}_{i}} \\
+									&\sim \sum_{k=1,N} w_i^{(k)}  \vect{z}_i^{(k)} \text{ where } w_i^{(k)} = \frac{ \p{ \vect{x}_i | \vect{z}_i^{(k)}} } {\sum_{l=1,K} \p{\vect{x}_i | \vect{z}_i^{(l))} }}	\\
+									&	0 \le w_i^{(k)} \le 1 \sum_{k=1,K}  w_i^{(k)} = 1\\
+						\Sigma_{i|i}	&=  \hat V[\vect{z}_i] = \mathbb{E}[\vect{z}_i^{2}] - \mathbb{E}[\vect{z}_i] \mathbb{E}[\vect{z}_i]					
+\end{align*}
+where $\mathbb{E}_{\vect{z}_i | \vect{x}_{1:i}} [\vect{z}_i^2] \sim \sum_{k=1,K} w_i^{(k)}  \vect{z}_i^{(k)^2}$.
+
+At this step we compute the prior on $\vect{z}_{i+1}$ using a 2-step sampling:
+\begin{enumerate}
+	\item [(a)] Draw K independent class assignments $c_i^{(k)}$ based on weights $w_i^{(k)}$. 
+	\item [(b)] Compute 
+		\begin{align*}	
+			\p{ \vect{z}_{i+1} | \vect{x}_{1:i} } 	&=  \mu_{i+1| i} = \int \p{\vect{z}_{i+1} |\vect{z}_{i},  \vect{x}_{1:i}} \p{\vect{z}_{i} | \vect{x}_{1:i}}   = \int \p{\vect{z}_{i+1} |\vect{z}_{i}} \p{\vect{z}_{i} |\vect{x}_{1:i}} d \vect{z}_{i} \\
+										&\sim \sum_k w_i^{(k)}  \p{ \vect{z}_{i+1} | \vect{z}_{i}^{(k)} } 
+		\end{align*}	
+		where we used the conditional independence between $\vect{z}_{i+1}$ and $\vect{x}_{1:i}$.		
+\end{enumerate}
+
+\begin{algorithm}[H]
+\textbf{INPUT:} \\
+	$K$ - Number of samples \\
+	$\matr{A}$ - transition matrix\\
+	$\matr{C}$ - observation matrix \\
+	$\matr{\Gamma}$ - transition covariance matrix \\
+	$\matr{\Sigma}$ - transition covariance matrix \\
+\caption{Pseudo-code for particle filter}
+	\begin{algorithmic}
+		\State Draw N samples from $P(z_1)=\mathcal{N}(\mu_0, \Sigma_0)$
+		\For{$i \gets 1 \textrm{ to } T$}  
+			\State Sample from $\p{ \vect{x}_i | \vect{z}_i^{(k)}} \gets \mathcal{N} (\vect{x}_i, \vect{z}_i^{(k)} * \matr{\Gamma},\matr{\Sigma}) $ 
+		 	\State Compute importance weights based on observation $\vect{x}_i$ where
+			$w_i^{(k)} \gets \frac{ \p{ \vect{x}_i | \vect{z}_i^{(k)}} } {\sum_{l=1,K} \p{\vect{x}_i | \vect{z}_i^{(l))} }}$
+			\State Draw N independent class assignments $ \{c_i^1 ,\cdots, c_i^K\} \gets \text{Multinomial} \{w_i^1 ,\cdots, w_i^K\}$
+			\State Resample $\vect{z}_{i}^{c_k}$ based on class assigment
+			\State $\vect{z}_{i+1} \gets  \matr{A} \vect{z}_{i}^{c_k} + \mathcal{N} (0 , \matr{Q} )$
+		\EndFor
+	\end{algorithmic}
+\end{algorithm}
+
 \end{document}
