@@ -3,6 +3,12 @@
 \usepackage[shortlabels]{enumitem}
 \usepackage[hyphens]{url}
 \usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+}
 \usepackage[nameinlink,noabbrev]{cleveref}
 \usepackage{xcolor}
 
@@ -21,19 +27,20 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section*{Abstract}
-Forecasting time series data is a challenging task but critical and has many applications in different industries such as finance, media or biomedical.
+Forecasting time series data is a challenging but critical task and has many applications in different industries such as finance, media or biomedical.
 In addition, complex and non-linear interdependencies between time steps and series complicate the task.
 Traditional methods have mostly be unsuccessful in modeling complex patterns or dependencies. 
 In this project, we aim to try different deep learning models on univariate time series point forecasting extending it to multivariate case if time permits.
-The M4 Competition large data set - 100,000 time series - is our reference dataset. 
-We will start using a classical statistical models such SARIMA , or Holt-Winters exponential smoothing to build our baselines and use deep learning architectures 
-such as N-BEATS \cite{N-BEATS}, or Fast ES-RNN \cite{ES-RNN}. We will report various accuracy metrics: sMAPE (symmetric Mean Absolute Percentage Error), MASE  (Mean Absolute Scaled Error) 
+The M4 Competition large data set - 100,000 time series - is our reference dataset. The dataset comes from a wide range of industries including Economics, Finance, Tourism, Trade, Real Estate, and so on, aiming at representing as much real world data as possible. (\hyperlink{https://github.com/M4Competition/M4-methods/tree/master/Dataset} {M4-dataset})
+We will start using a classical statistical models such as SARIMA, TBATS and Holt-Winters exponential smoothing to build our baseline models and use deep learning architectures 
+including N-BEATS \cite{N-BEATS} and Fast ES-RNN \cite{ES-RNN} to compare how performances improve differently. We will report various accuracy metrics: sMAPE (symmetric Mean Absolute Percentage Error), MASE  (Mean Absolute Scaled Error) 
 or OWA (overall weighted average).
 
 \section{Related work}
 Named after the forecasting researcher Spyros Makridakis, the M Competition has been one of the most important events since 1982 in the forecasting community.
-The competitions compare the accuracy of different time series forecasting methods including the most advanced statistical models. The winner of 2018 competition, is
-called ES-RNN (Exponential Smoothing-Recurrent Neural Network), and is an hybrid approach of attention based dilated LSTM with a classical Holt-Winters model. 
+The competitions compare the accuracy of different time series forecasting methods including the most advanced statistical models. The winner of 2018 competition is
+called ES-RNN (Exponential Smoothing-Recurrent Neural Network), and is a hybrid approach of attention based dilated LSTM (Long Short-Term Memory) with a classical Holt-Winters model. 
+N-BEATS is a model that purely relies on deep learning, without any combination with statistical models. Specifically, this model challenges ES-RNN model's heavy dependence on the Holt-Winters component.  
 
 \section{Our contribution}
 
