@@ -5,6 +5,8 @@ import numpy as np
 import pandas as pd
 from hmmlearn import hmm
 from scipy.stats import norm
+from sklearn.mixture import BayesianGaussianMixture
+import seaborn as sns
 
 DATA_FILE = "../../data/sp500w.csv"
 
@@ -19,6 +21,8 @@ def read_data():
     df = pd.read_csv(DATA_FILE)
     df.drop("Unnamed: 0", axis=1, inplace=True)
     df = df[df["Close"] > -0.2]
+    #df = df[df["Close"] > 0]
+    df = df[df["Close"] < 25]
     return np.array(df["Close"])
 
 
@@ -44,15 +48,34 @@ class MyHMM:
         self.covars_ = np.ones(self.num_unique_states)
 
     def init_parameters_tsa4(self):
-        self.transmat_ = np.array([[0.945, 0.055, 0], [.739, 0, .261], [.032, .027, .942]])
+        #self.transmat_ = np.array([[0.945, 0.055, 0], [.739, 0, .261], [.032, .027, .942]])
+        self.transmat_ = np.ones((self.num_unique_states, self.num_unique_states))
+        self.transmat_ = self.transmat_ / np.sum(self.transmat_, axis=1)
+        self.transmat_ = self.transmat_ / np.sum(self.transmat_, axis=1).reshape(1, -1).T
         self.emission_matrix = np.zeros((self.num_unique_states, self.num_observations))
         self.startprob_ = np.ones((self.num_unique_states, 1))
         self.startprob_ = self.startprob_ / self.num_unique_states
         # print("PI={}".format(self.initial_states_vector))
-        self.means_ = np.random.rand(self.num_unique_states)
-        # print("Mean={}".format(self.means))
+        #self.means_ = np.random.rand(self.num_unique_states)
+        self.means_ = np.array([0.04, -0.34, -0.003])
         # print(self.means.shape)
+        self.covars_ =  np.array([.014, .009, .044])
+        #self.covars_ = np.ones(self.num_unique_states)
+
+    def init_parameters_with_gmm(self):
+        gmm = BayesianGaussianMixture(weight_concentration_prior_type="dirichlet_process",
+                                      n_components=3, init_params="random", max_iter=1500)
+        gmm.fit(data.reshape(-1, 1))
+        self.means_ = gmm.means_.flatten()
+        # self.covars_ = gmm.covariances_.flatten()
+        # print(self.covars_)
         self.covars_ = np.ones(self.num_unique_states)
+        self.emission_matrix = np.zeros((self.num_unique_states, self.num_observations))
+        self.startprob_ = np.ones((self.num_unique_states, 1))
+        self.startprob_ = self.startprob_ / self.num_unique_states
+        self.transmat_ = np.ones((self.num_unique_states, self.num_unique_states))
+        self.transmat_ = self.transmat_ / np.sum(self.transmat_, axis=1)
+        self.transmat_ = self.transmat_ / np.sum(self.transmat_, axis=1).reshape(1, -1).T
 
     def create_alpha(self, data):
         alpha = np.zeros((self.num_unique_states, self.num_observations))
@@ -127,7 +150,7 @@ class MyHMM:
         iter = 0
         while (True):
             iter += 1
-            # print(iter)
+            print(iter)
             gamma, xi, c = self.e_step(data)
             # print("Gamma={}".format(gamma))
             # print("XI={}".format(xi))
@@ -137,7 +160,8 @@ class MyHMM:
             # print("Mean={}".format(hmm.means))
             # print("STDS={}".format(hmm.stds))
             ll = np.sum(np.log(c))
-            if (iter > 50 or (ll - prev_ll) < 0.05):
+            if (iter > 10):
+            #if (iter > 1000 or (ll - prev_ll) < 1e-3):
                 print("iter={}, (ll - prev_ll)={}".format(iter, ll - prev_ll))
                 break
             ll_list.append(ll)
@@ -146,59 +170,44 @@ class MyHMM:
 
 def create_model(num_states, data, model_type):
     num_observations = data.shape[0]
-    transmat_prior = np.array([[0.945, 0.055, 0.00001], [.739, 0.00001, .261], [.032, .027, .942]])
     if model_type == ModelType.MYHMM:
         model = MyHMM(num_states, num_observations)
     elif model_type == ModelType.GAUSSHMM:
-        model = hmm.GaussianHMM(n_components=3, covariance_type="full", n_iter=100)
+        model = hmm.GaussianHMM(n_components=3, covariance_type="full", n_iter=2000)
         data = data.reshape(-1, 1)
     elif model_type == ModelType.GMMHMM:
-        model = hmm.GMMHMM(n_components=3, n_mix=3, covariance_type="diag")
+        model = hmm.GMMHMM(n_components=3, n_mix=3, covariance_type="full")
         data = data.reshape(-1, 1)
 
     return model, data
 
 
-def plot_gaussian(model):
+def plot_gaussian(data, model):
     print("PI={}".format(model.startprob_))
     print("A={}".format(model.transmat_))
-    print("STDS={}".format(model.covars_))
 
     fig, ax = plt.subplots(figsize=(15, 4))
     means = model.means_.flatten()
-    print("Mean={}".format(means))
+    #means = np.array([0.04, -0.34, -0.003])
     ind = means.argsort()[-3:][::-1]
     means = means[ind]
+    print("Mean={}".format(means))
     stds = model.covars_.flatten()
-    print("Stds={}".format(stds))
+    #stds = np.array([.014, .009, .044])
     # ind = stds.argsort()[-3:][::-1]
     stds = stds[ind]
     print("Stds={}".format(stds))
-    x = np.linspace(means[0] - 3 * stds[0], means[0] + 3 * stds[0], 100)
-    ax.plot(x, norm.pdf(x, means[0], stds[0]), ".", color="red")
+    x = np.linspace(-0.1, 0.1, 100)
+    sns.distplot(data, bins=25, ax=ax, kde=True)
+    ax.plot(x, norm.pdf(x, means[0], stds[0]), ".", color="grey")
     ax.plot(x, norm.pdf(x, means[1], stds[1]), ".", color="blue")
-    ax.plot(x, norm.pdf(x, means[2], stds[2]), ".", color="green")
-    plt.show()
-
-
-def plot_gmmhmm(model):
-    fig, ax = plt.subplots(figsize=(15, 4))
-    means = model.means_.flatten()
-    print("means={}".format(means))
-    stds = model.covars_.flatten()
-    print("sigmas={}".format(stds))
-    mu = means[2]
-    sigma = stds[2]
-    x = np.linspace(mu - 5 * sigma, mu + 5 * sigma, 100)
-    ax.plot(x, norm.pdf(x, mu, sigma), ".", color="red")
-    ax.plot(x, 5 * norm.pdf(x, means[1], stds[1]), ".", color="blue")
-    ax.plot(x, 10 * norm.pdf(x, means[2], stds[2]), ".", color="green")
+    ax.plot(x, norm.pdf(x, means[2], stds[2]), ".", color="red")
     plt.show()
 
 
 if __name__ == "__main__":
     data = read_data()
-    model, data = create_model(3, data, ModelType.GAUSSHMM)
+    model, data = create_model(3, data, ModelType.MYHMM)
     model.fit(data)
-    plot_gaussian(model)
+    plot_gaussian(data, model)
     # print(model.monitor_.converged)
