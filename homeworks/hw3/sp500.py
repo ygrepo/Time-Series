@@ -150,7 +150,7 @@ class MyHMM:
         iter = 0
         while (True):
             iter += 1
-            print(iter)
+            print("Iteration={}".format(iter))
             gamma, xi, c = self.e_step(data)
             # print("Gamma={}".format(gamma))
             # print("XI={}".format(xi))
@@ -160,8 +160,7 @@ class MyHMM:
             # print("Mean={}".format(hmm.means))
             # print("STDS={}".format(hmm.stds))
             ll = np.sum(np.log(c))
-            if (iter > 10):
-            #if (iter > 1000 or (ll - prev_ll) < 1e-3):
+            if (iter > 40 or (ll - prev_ll) < 1e-3):
                 print("iter={}, (ll - prev_ll)={}".format(iter, ll - prev_ll))
                 break
             ll_list.append(ll)
@@ -176,7 +175,7 @@ def create_model(num_states, data, model_type):
         model = hmm.GaussianHMM(n_components=3, covariance_type="full", n_iter=2000)
         data = data.reshape(-1, 1)
     elif model_type == ModelType.GMMHMM:
-        model = hmm.GMMHMM(n_components=3, n_mix=3, covariance_type="full")
+        model = hmm.GMMHMM(n_components=3, n_mix=10, covariance_type="full")
         data = data.reshape(-1, 1)
 
     return model, data
@@ -194,20 +193,27 @@ def plot_gaussian(data, model):
     print("Mean={}".format(means))
     stds = model.covars_.flatten()
     #stds = np.array([.014, .009, .044])
-    # ind = stds.argsort()[-3:][::-1]
+    ind = stds.argsort()[-3:][::-1]
     stds = stds[ind]
     print("Stds={}".format(stds))
-    x = np.linspace(-0.1, 0.1, 100)
+    #x = np.linspace(0.026, 0.07, 100)
+    x = np.linspace(means[0]-3 * stds[0], means[0]+3 * stds[0], 100)
     sns.distplot(data, bins=25, ax=ax, kde=True)
     ax.plot(x, norm.pdf(x, means[0], stds[0]), ".", color="grey")
     ax.plot(x, norm.pdf(x, means[1], stds[1]), ".", color="blue")
     ax.plot(x, norm.pdf(x, means[2], stds[2]), ".", color="red")
+    ax.set_xlabel("S&P500 Weekly Returns")
+    ax.set_ylabel("Density")
     plt.show()
 
 
 if __name__ == "__main__":
     data = read_data()
-    model, data = create_model(3, data, ModelType.MYHMM)
+    from sklearn.preprocessing import StandardScaler
+
+    scaler = StandardScaler()
+    data = scaler.fit_transform(data.reshape(-1, 1))
+    model, data = create_model(3, data, ModelType.GAUSSHMM)
     model.fit(data)
     plot_gaussian(data, model)
     # print(model.monitor_.converged)
