@@ -41,7 +41,7 @@
 %\usepackage{hyperref}
 
 \title{Univariate Time Series Forecasting Using  M4 Competition Deep Learning Architectures}
-\author{Yves Greatti, Zian Chen, Sunjoo Park}
+\author{Zian Chen, Sunjoo Park, Yves Greatti}
 \date{}
 
 \begin{document}
@@ -81,12 +81,14 @@ where $T$ is the length of the history, $H$ is the length of the forecast horizo
 
 \section{Our contribution}
 
-We propose to run different experimentations on the M4 dataset with the two main architectures: ES-RNN and N-BEATS, comparing the results obtained with these two models.
+We propose to run different experimentations on the M4 dataset with the two main architectures: ES-RNN and N-BEATS, comparing the results obtained with these two models 
+with the benchmark we established using a classical statistical model.
 The hyper-parameters of these two networks are carefully tuned with hand-crafted validation data sets which we will replicate. 
 In addition, ES-RNN expects to have all the series of equal length, and use a data windowing followed by a one-hot representation.
-We will report for the two networks the optimal settings of the parameters, and make progress on open tasks reported by each paper.
+We will report for the two networks the optimal settings of the parameters, and maybe make progress on open tasks reported by each paper.
 For example, the authors of the ES-RNN mention, that being able to support variable length series will be critical as shorter series could be introduced.
 Another important factor to consider for these models, is the amount of regularization needed: too much and we prevent the model from learning, and too little might cause to fall into a local optima.
+
 Also these networks consists in complex stacking of layers, one of our goal is to quantify the interpretability of the results provided 
 by each model, by being able to decompose each series into trend and seasonality components. 
 In this regard, we want to investigate a neural network technique called Neural Decomposition (ND) \cite{NeuralDecomposition}. This sort of neural network
@@ -94,9 +96,10 @@ decomposes a series into a sum of sinusoids, inspired by Fourier transform, to c
 
 The work will be organized among us in this respect: 
 \begin{itemize}
-	\item[(a)] \textbf{Zian Chen}: 
-	\item[(b)] \textbf{Sunjoo Park}: 
-	\item[(c)] \textbf{Yves Greatti}: will help in settings the two networks, and the optimization of the hyper-parameters and will investigate the Neural Decomposition applied to the M4 datasets.
+	\item[(a)] \textbf{Zian Chen}: will focus on implementing N-BEATS on M4 datasets, tuning hyper- parameters and comparing the results of N-BEATS with the baseline models.
+	\item[(b)] \textbf{Sunjoo Park}: will implement ES-RNN model using GPU on M4 datasets, optimize the model tuning hyper-parameters and differentiate model performances.
+	\item[(c)] \textbf{Yves Greatti}: will set up the baseline models using SARIMA and  Holt-Winters exponential smoothing, helps if necessary in settings the two networks, and the optimization of the hyper-parameters 
+	and will investigate the Neural Decomposition applied to the M4 datasets.
 \end{itemize}
 
 \section{Conclusion}

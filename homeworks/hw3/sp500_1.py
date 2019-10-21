@@ -46,8 +46,8 @@ class MyHMM:
         self.transmat_ = self.transmat_ / np.sum(self.transmat_, axis=1).reshape(1, -1).T
         # print("A={}".format(self.transition_matrix))
         self.emission_matrix = np.zeros((self.num_unique_states, self.num_observations))
-        #self.startprob_ = np.ones((self.num_unique_states, 1))
-        #self.startprob_ = self.startprob_ / self.num_unique_states
+        self.startprob_ = np.ones((self.num_unique_states, 1))
+        self.startprob_ = self.startprob_ / self.num_unique_states
         # print("PI={}".format(self.initial_states_vector))
         self.means_ = np.random.rand(self.num_unique_states)
         # print("Mean={}".format(self.means))
@@ -78,6 +78,7 @@ class MyHMM:
         for i in range(len(centers)):
             self.means_[i] = centers[i].mean
         self.startprob_ = pi
+        # print(self.transmat_)
 
     def init_parameters_tsa4(self):
         # self.transmat_ = np.array([[0.945, 0.055, 0], [.739, 0, .261], [.032, .027, .942]])
@@ -192,7 +193,7 @@ class MyHMM:
             # print("Mean={}".format(hmm.means))
             # print("STDS={}".format(hmm.stds))
             ll = np.sum(np.log(c))
-            if iter > 10:
+            if iter > 40:
                 # if (iter > 40 or (ll - prev_ll) < 1e-3):
                 print("iter={}, (ll - prev_ll)={}".format(iter, ll - prev_ll))
                 break
@@ -222,20 +223,15 @@ def plot_gaussian(data, model, num_states=3):
     print("PI={}".format(model.startprob_))
     print("A={}".format(model.transmat_))
 
-
     fig, ax = plt.subplots(figsize=(15, 4))
     means = model.means_.flatten()
     # means = np.array([0.04, -0.34, -0.003])
-    #means = np.array([-0.00289348, 0.00592688, -0.00017419])
-    #means = np.array([-0.00017419, 0.00592688, -0.00289348])
     ind = means.argsort()[-3:][::-1]
     means = means[ind]
     print("Mean={}".format(means))
     stds = model.covars_.flatten()
     # stds = np.array([.014, .009, .044])
-    #stds = np.array([0.00030478, 0.00013561, 0.00156399])
-    #stds = np.array([2.25420178, 0.27484897, 1.2148339])
-    #ind = stds.argsort()[-3:][::-1]
+    ind = stds.argsort()[-3:][::-1]
     stds = stds[ind]
     print("Stds={}".format(stds))
     # x = np.linspace(0.026, 0.07, 100)
@@ -254,7 +250,7 @@ if __name__ == "__main__":
     data = read_data()
 
     model, data = create_model(data, ModelType.MYHMM, num_states=3)
-    #model, data = create_model(data, ModelType.GAUSSHMM, num_states=3)
+    # model, data = create_model(data, ModelType.GAUSSHMM, num_states=3)
     model.fit(data)
     plot_gaussian(data, model, num_states=2)
     # print(model.monitor_.converged)
