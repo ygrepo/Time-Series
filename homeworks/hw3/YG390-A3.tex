@@ -114,8 +114,7 @@ Use this code to fit the weekly S\&P 500 returns data (data/sp500w.csv) for K = 
 Hint: Use Example 6.17 from tsa4 textbook as guideline for plots and interpretation.
 
 For the parameters initialization, we use a gaussian mixture which gives us estimates for the mean and the covariance of each components namely $\mu_k$ and $\Sigma_k$ from
-the handout. The initial distribution of the initial state $\vect{z}_1$, $\vect{\pi}$ is implemented by an E-M step. 
-The initial values of the means are provided by KMeans and updated by an expectation-maximization algorithm.
+the handout. The initial distribution of the initial state $\vect{z}_1$, $\vect{\pi}$ is estimated by implementing an E-M step on the data itself and estimating $\p{\vect{z}_1|\vect{x}_1}$. 
 
 Once the initialization is completed, we alternate between the E steps, for which we run the alpha-beta algorithm with the current estimates, determining:
 \begin{align*}
@@ -127,10 +126,14 @@ Once the initialization is completed, we alternate between the E steps, for whic
 
 And the M step, which updates the parameters:
 \begin{align*}
+	\pi_k			&=	\frac{ \gamma(\vect{z}_{1,k}) } {\sum_j \gamma(\vect{z}_{1,j}) } \\
+	\matr{A}_{jk}	&=	\frac{ \sum_i \xi(\vect{z}_{i,j} , \vect{z}_{i+1,k})}	{ \sum_{i,l} \xi(\vect{z}_{i,j} , \vect{z}_{i+1,l}) } \\
+	\mu_k		&=	\frac{1} {\sum_i \gamma(\vect{z}_{i,k}) }  \sum_i \gamma(\vect{z}_{i,k}) \vect{x}_i \\
+	\Sigma_k		&= 	\frac{1} {\sum_i \gamma(\vect{z}_{i,k}) }  \bigg(	\sum_i \gamma(\vect{z}_{i,k}) \vect{x}_i  \vect{x}_i^t	\bigg) - \mu_k \mu_k^t
 \end{align*}
 
-The result for $K=3$, are plotted below with the top plot showing the log loss of the data, the middle plot the inference obtained with our model and the bottom the plot using the means and covariances
-indicated by ts4 textbook.  We can see that our model to some extent captures better the distribution of the raw data.
+The result for $K=3$, are plotted below with the top plot showing the log loss of the data, the middle plot the inference obtained with our model and at the bottom, the plot using the means and covariances
+indicated by ts4 textbook.  We can see that our model, to some extent, captures better the distribution of the raw data.
 
 \begin{center}
 	\includegraphics[width=1\linewidth]{figures/problem-3-1.png} 
@@ -140,7 +143,7 @@ indicated by ts4 textbook.  We can see that our model to some extent captures be
 	\includegraphics[width=1\linewidth]{figures/problem-3-2.png} 
 \end{center}
 
-The performance of our model compared to hmmlearn Gaussian smoother,  are similar, the GaussianHMM model covering more of the data along the x-axis whereas our model cover  the
+The performance of our model compared to hmmlearn Gaussian smoother,  are similar, the GaussianHMM model covering more of the data along the x-axis whereas our model covers the
 distribution better along the y-axis.
 \begin{center}
 	\includegraphics[width=1\linewidth]{figures/problem-3-3.png} 
@@ -156,7 +159,7 @@ For $K=2$, the fit is worst but we can see that tsa4 model does not cover the di
 	\includegraphics[width=1\linewidth]{figures/problem-3-6.png} 
 \end{center}
 
-Lastly, the log loss for $K=2$:
+Lastly, the log loss for $K=2$ is increasing similarly to the log loss obtained for $K=3$:
 
 \begin{center}
 	\includegraphics[width=1\linewidth]{figures/problem-3-4.png} 
