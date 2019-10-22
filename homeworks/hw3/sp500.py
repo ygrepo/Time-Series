@@ -44,14 +44,8 @@ class MyHMM:
         self.transmat_ = np.ones((self.num_unique_states, self.num_unique_states))
         self.transmat_ = self.transmat_ / np.sum(self.transmat_, axis=1)
         self.transmat_ = self.transmat_ / np.sum(self.transmat_, axis=1).reshape(1, -1).T
-        # print("A={}".format(self.transition_matrix))
         self.emission_matrix = np.zeros((self.num_unique_states, self.num_observations))
-        #self.startprob_ = np.ones((self.num_unique_states, 1))
-        #self.startprob_ = self.startprob_ / self.num_unique_states
-        # print("PI={}".format(self.initial_states_vector))
         self.means_ = np.random.rand(self.num_unique_states)
-        # print("Mean={}".format(self.means))
-        # print(self.means.shape)
         self.covars_ = np.ones(self.num_unique_states)
 
         # main_kmeans = cluster.KMeans(n_clusters=self.n_components,
@@ -78,6 +72,11 @@ class MyHMM:
         for i in range(len(centers)):
             self.means_[i] = centers[i].mean
         self.startprob_ = pi
+        gmm = BayesianGaussianMixture(_components=3, init_params="kmeans", max_iter=1500)
+        gmm.fit(data.reshape(-1, 1))
+        self.means_ = gmm.means_.flatten()
+        # self.covars_ = gmm.covariances_.flatten()
+        # print(self.covars_)
 
     def init_parameters_tsa4(self):
         # self.transmat_ = np.array([[0.945, 0.055, 0], [.739, 0, .261], [.032, .027, .942]])
@@ -231,7 +230,7 @@ def plot_gaussian(data, model, num_states=3):
     ind = means.argsort()[-3:][::-1]
     means = means[ind]
     print("Mean={}".format(means))
-    stds = model.covars_.flatten()
+    stds = np.sqrt(model.covars_.flatten())
     # stds = np.array([.014, .009, .044])
     #stds = np.array([0.00030478, 0.00013561, 0.00156399])
     #stds = np.array([2.25420178, 0.27484897, 1.2148339])
@@ -253,8 +252,8 @@ def plot_gaussian(data, model, num_states=3):
 if __name__ == "__main__":
     data = read_data()
 
-    model, data = create_model(data, ModelType.MYHMM, num_states=3)
-    #model, data = create_model(data, ModelType.GAUSSHMM, num_states=3)
+    #model, data = create_model(data, ModelType.MYHMM, num_states=3)
+    model, data = create_model(data, ModelType.GAUSSHMM, num_states=3)
     model.fit(data)
-    plot_gaussian(data, model, num_states=2)
+    plot_gaussian(data, model, num_states=3)
     # print(model.monitor_.converged)
