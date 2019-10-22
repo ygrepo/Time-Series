@@ -14,8 +14,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
+from hmmlearn import hmm
 from scipy.stats import norm
 from sklearn.mixture import BayesianGaussianMixture
+
 import homeworks.hw3.distributions as distributions
 import homeworks.hw3.em as em
 from homeworks.hw3 import kmeans
@@ -59,7 +61,14 @@ def initForwardBackward(X, K, d, N):
 
     # Initialize the marginal probability for the first hidden variable
     # It is a Kx1 vector
-    PI = np.ones((K, 1)) / K
+    iterations = 40
+    assignments, centers, _ = kmeans.kmeans_best_of_n(X.T, K, n_trials=5)
+    new_centers = [distributions.Gaussian(c.mean, np.eye(1)) \
+                   for c in centers]
+    tau, obs_distr, pi, gmm_ll_train, gmm_ll_test = \
+        em.em(X.T, new_centers, assignments, n_iter=iterations)
+
+    PI = pi
 
     # Initialize Emission Probability. We assume Gaussian distribution
     # for emission. So we just need to keep the mean and covariance. These 
@@ -77,14 +86,6 @@ def initForwardBackward(X, K, d, N):
     for i in range(covars.size):
         SIGMA[i] = np.array([covars[i]]).reshape(1, 1)
 
-    iterations = 40
-    assignments, centers, _ = kmeans.kmeans_best_of_n(X.T, K, n_trials=5)
-    new_centers = [distributions.Gaussian(c.mean, np.eye(1)) \
-                       for c in centers]
-    tau, obs_distr, pi, gmm_ll_train, gmm_ll_test = \
-            em.em(X.T, new_centers, assignments, n_iter=iterations)
-    
-    PI = pi
     return A, PI, MU, SIGMA
 
 
@@ -190,6 +191,16 @@ def Mstep(X, Gamma, Xi):
     return PI, A, MU, SIGMA
 
 
+def plot_loss(iter, losses):
+    fig, ax = plt.subplots(figsize=(7, 6))
+
+    ax.set_xlabel("Iteration")
+    ax.set_ylabel("Log Likelihood of Data")
+    ax.set_title("Log loss: $\log{(P(X_{1:t}))}$")
+    ax.plot(np.arange(0, iter), np.array(losses), color="red")
+    plt.show()
+
+
 def plot_gaussian(data, means, covars, ax, title):
     ind = means.argsort()[-3:][::-1]
     means = means[ind]
@@ -203,29 +214,23 @@ def plot_gaussian(data, means, covars, ax, title):
     ax.plot(x1, norm.pdf(x1, means[0], covars[0]), ".", color="grey")
     ax.plot(x2, norm.pdf(x2, means[1], covars[1]), ".", color="blue")
     ax.plot(x3, norm.pdf(x3, means[2], covars[2]), ".", color="red")
-    ax.set_xlabel("S&P500 Weekly Returns")
+    ax.set_xlabel("")
     ax.set_ylabel("Density")
     ax.set_title(title)
 
 
-def plot_results(data, iter, losses, means, covars):
-    fig, ax = plt.subplots(3, 1, figsize=(15, 20))
-    fig.subplots_adjust(hspace=1)
-
-    ax[0].set_xlabel("Iteration")
-    ax[0].set_ylabel("Log Likelihood of Data")
-    ax[0].set_title("Log loss $\log{(P(X_{1:t}))}$")
-    ax[0].plot(np.arange(0, iter), np.array(losses))
-
+def plot_results(data, means, covars, ref_means, ref_covars, ref_title):
     ind = means.argsort()[-3:][::-1]
     means = means[ind]
     covars = covars[ind]
 
-    plot_gaussian(data, means, covars, ax[1], "Model Inference")
-    means = np.array([0.004, -0.34, -0.003])
-    covars = np.array([.014, .009, .044])
-    plot_gaussian(data, means, np.sqrt(covars), ax[2], "TSA4 Reference")
+    fig, ax = plt.subplots(2, 1, sharex=True, figsize=(15, 8))
+    fig.subplots_adjust(hspace=0.2)
 
+    plot_gaussian(data, means, covars, ax[0], "MY HMM Model")
+    plot_gaussian(data, ref_means, ref_covars, ax[1], ref_title)
+    plt.xlabel("S&P500 Weekly Returns")
+    sns.despine()
     plt.show()
 
 
@@ -233,8 +238,6 @@ def main():
     # Reading the data file
     data = read_data()
     allData = np.array(data).reshape(-1, 1)
-
-    allData = allData.reshape(-1, 1)
     (m, n) = np.shape(allData)
 
     trainSet = allData.T
@@ -261,11 +264,13 @@ def main():
 
         iter = iter + 1
 
-        if (iter > 50 or (ll - prev_ll) < 1e-3):
+        if iter > 50 or (ll - prev_ll) < 1e-3:
             print("iter={}, (ll - prev_ll)={}".format(iter, ll - prev_ll))
             break
         print(abs(ll - prev_ll))
         prev_ll = ll
+
+    plot_loss(iter, losses)
 
     print("PI={}".format(PI))
     print("A={}".format(A))
@@ -275,7 +280,16 @@ def main():
     for i in range(len(SIGMA)):
         sigmas[i] = np.sqrt(SIGMA[i].flatten())
 
-    plot_results(data, iter, losses, MU.flatten(), sigmas)
+    ref_means = np.array([0.004, -0.34, -0.003])
+    ref_covars = np.array([.014, .009, .044])
+    plot_results(data, MU.flatten(), sigmas, ref_means, np.sqrt(ref_covars), "TSA4 Reference Curves")
+
+    model = hmm.GaussianHMM(n_components=3, covariance_type="full", n_iter=2000)
+    model.fit(allData)
+    print("A={}".format(model.transmat_))
+    ref_means = model.means_.flatten()
+    ref_covars = model.covars_.flatten()
+    plot_results(data, MU.flatten(), sigmas, ref_means, np.sqrt(ref_covars), "HMMLearn Gaussian Estimations")
 
 
 if __name__ == '__main__':

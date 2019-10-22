@@ -49,7 +49,6 @@ def em(X, init_obs_distr, assignments=None, n_iter=10, Xtest=None):
 
         for j in range(K):
             obs_distr[j].max_likelihood(X, tau[:, j])
-        # Tracer()()
 
         ll_train.append(log_likelihood(X, obs_distr, pi))
         if Xtest is not None:
