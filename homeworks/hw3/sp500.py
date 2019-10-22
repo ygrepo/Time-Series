@@ -6,13 +6,12 @@ import pandas as pd
 import seaborn as sns
 from hmmlearn import hmm
 from scipy.stats import norm
-from sklearn import cluster
 from sklearn.mixture import BayesianGaussianMixture
 from sklearn.preprocessing import StandardScaler
-from sklearn.utils import check_random_state
-from homeworks.hw3 import kmeans
-import homeworks.hw3.em as em
+
 import homeworks.hw3.distributions as distributions
+import homeworks.hw3.em as em
+from homeworks.hw3 import kmeans
 
 DATA_FILE = "../../data/sp500w.csv"
 
@@ -221,20 +220,19 @@ def plot_gaussian(data, model, num_states=3):
     print("PI={}".format(model.startprob_))
     print("A={}".format(model.transmat_))
 
-
     fig, ax = plt.subplots(figsize=(15, 4))
     means = model.means_.flatten()
     # means = np.array([0.04, -0.34, -0.003])
-    #means = np.array([-0.00289348, 0.00592688, -0.00017419])
-    #means = np.array([-0.00017419, 0.00592688, -0.00289348])
+    # means = np.array([-0.00289348, 0.00592688, -0.00017419])
+    # means = np.array([-0.00017419, 0.00592688, -0.00289348])
     ind = means.argsort()[-3:][::-1]
     means = means[ind]
     print("Mean={}".format(means))
     stds = np.sqrt(model.covars_.flatten())
     # stds = np.array([.014, .009, .044])
-    #stds = np.array([0.00030478, 0.00013561, 0.00156399])
-    #stds = np.array([2.25420178, 0.27484897, 1.2148339])
-    #ind = stds.argsort()[-3:][::-1]
+    # stds = np.array([0.00030478, 0.00013561, 0.00156399])
+    # stds = np.array([2.25420178, 0.27484897, 1.2148339])
+    # ind = stds.argsort()[-3:][::-1]
     stds = stds[ind]
     print("Stds={}".format(stds))
     # x = np.linspace(0.026, 0.07, 100)
@@ -252,7 +250,7 @@ def plot_gaussian(data, model, num_states=3):
 if __name__ == "__main__":
     data = read_data()
 
-    #model, data = create_model(data, ModelType.MYHMM, num_states=3)
+    # model, data = create_model(data, ModelType.MYHMM, num_states=3)
     model, data = create_model(data, ModelType.GAUSSHMM, num_states=3)
     model.fit(data)
     plot_gaussian(data, model, num_states=3)

@@ -13,9 +13,12 @@ What is the best number of states?
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import seaborn as sns
 from scipy.stats import norm
 from sklearn.mixture import BayesianGaussianMixture
-import seaborn as sns
+import homeworks.hw3.distributions as distributions
+import homeworks.hw3.em as em
+from homeworks.hw3 import kmeans
 
 # Note: X and mu are assumed to be column vector
 DATA_FILE = "../../data/sp500w.csv"
@@ -53,12 +56,10 @@ def initForwardBackward(X, K, d, N):
     # State transition probability is time independent.
     A = np.ones((K, K))
     A = A / np.sum(A, 1)[None].T
-    # print("A={}".format(A))
 
     # Initialize the marginal probability for the first hidden variable
     # It is a Kx1 vector
     PI = np.ones((K, 1)) / K
-    # print("PI={}".format(PI))
 
     # Initialize Emission Probability. We assume Gaussian distribution
     # for emission. So we just need to keep the mean and covariance. These 
@@ -68,7 +69,6 @@ def initForwardBackward(X, K, d, N):
     # covariance matrix for the corresponding state.
     # Given the current latent variable state, emission probability is
     # independent of time
-    MU = np.random.rand(d, K)
     SIGMA = [np.eye(d) for i in range(K)]
     gmm = BayesianGaussianMixture(n_components=3, init_params="kmeans", max_iter=1500)
     gmm.fit(X.reshape(-1, 1))
@@ -77,6 +77,14 @@ def initForwardBackward(X, K, d, N):
     for i in range(covars.size):
         SIGMA[i] = np.array([covars[i]]).reshape(1, 1)
 
+    iterations = 40
+    assignments, centers, _ = kmeans.kmeans_best_of_n(X.T, K, n_trials=5)
+    new_centers = [distributions.Gaussian(c.mean, np.eye(1)) \
+                       for c in centers]
+    tau, obs_distr, pi, gmm_ll_train, gmm_ll_test = \
+            em.em(X.T, new_centers, assignments, n_iter=iterations)
+    
+    PI = pi
     return A, PI, MU, SIGMA
 
 
@@ -182,31 +190,42 @@ def Mstep(X, Gamma, Xi):
     return PI, A, MU, SIGMA
 
 
+def plot_gaussian(data, means, covars, ax, title):
+    ind = means.argsort()[-3:][::-1]
+    means = means[ind]
+    print("Mean={}".format(means))
+    covars = covars[ind]
+    print("Covars={}".format(covars))
+    x1 = np.linspace(means[0] - 2 * covars[0], means[0] + 2 * covars[0], 100)
+    x2 = np.linspace(means[1] - 2 * covars[1], means[1] + 2 * covars[1], 100)
+    x3 = np.linspace(means[2] - 2 * covars[2], means[2] + 2 * covars[2], 100)
+    sns.distplot(data, bins=50, ax=ax, kde=True)
+    ax.plot(x1, norm.pdf(x1, means[0], covars[0]), ".", color="grey")
+    ax.plot(x2, norm.pdf(x2, means[1], covars[1]), ".", color="blue")
+    ax.plot(x3, norm.pdf(x3, means[2], covars[2]), ".", color="red")
+    ax.set_xlabel("S&P500 Weekly Returns")
+    ax.set_ylabel("Density")
+    ax.set_title(title)
+
+
 def plot_results(data, iter, losses, means, covars):
-    fig, ax = plt.subplots(2, 1, figsize=(15, 5))
-    fig.subplots_adjust(hspace=.5)
+    fig, ax = plt.subplots(3, 1, figsize=(15, 20))
+    fig.subplots_adjust(hspace=1)
 
     ax[0].set_xlabel("Iteration")
     ax[0].set_ylabel("Log Likelihood of Data")
     ax[0].set_title("Log loss $\log{(P(X_{1:t}))}$")
     ax[0].plot(np.arange(0, iter), np.array(losses))
 
-    # means = np.array([0.004, -0.34, -0.003])
     ind = means.argsort()[-3:][::-1]
     means = means[ind]
-    print("Mean={}".format(means))
-    # stds = np.array([.014, .009, .044])
     covars = covars[ind]
-    print("Covars={}".format(covars))
-    x1 = np.linspace(means[0] - 2 * covars[0], means[0] + 2 * covars[0], 100)
-    x2 = np.linspace(means[1] - 2 * covars[1], means[1] + 2 * covars[1], 100)
-    x3 = np.linspace(means[2] - 2 * covars[2], means[2] + 2 * covars[2], 100)
-    sns.distplot(data, bins=50, ax=ax[1], kde=True)
-    ax[1].plot(x1, norm.pdf(x1, means[0], covars[0]), ".", color="grey")
-    ax[1].plot(x2, norm.pdf(x2, means[1], covars[1]), ".", color="blue")
-    ax[1].plot(x3, norm.pdf(x3, means[2], covars[2]), ".", color="red")
-    ax[1].set_xlabel("S&P500 Weekly Returns")
-    ax[1].set_ylabel("Density")
+
+    plot_gaussian(data, means, covars, ax[1], "Model Inference")
+    means = np.array([0.004, -0.34, -0.003])
+    covars = np.array([.014, .009, .044])
+    plot_gaussian(data, means, np.sqrt(covars), ax[2], "TSA4 Reference")
+
     plt.show()
 
 
