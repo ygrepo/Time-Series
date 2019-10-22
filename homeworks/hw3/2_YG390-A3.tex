@@ -92,19 +92,23 @@ Based on the transition matrix $\matr{A}$ then the only possible state sequences
 \noindent \textbf{Problem 2.} (15p)\\
 Construct an HMM that generates the observation sequence $A^{k_1}C^{k_2}A^{k_3}C^{k_4}$ where $A^{k_1}$ denotes $k_1$ repeats of symbol $A$ and the number of repeats $k_i$ are drawn from the set $\{1,2,3\}$ with equal probability.\\
 
-The HMM model is defined by three class of parameters $\{\matr{A}, \matr{B}, \pi \}$, and is described in the graph below. Note that there is a direct connection between the states STOP\_k2 and S\_7 which I broke down into two for convenience of
-representation.
-The latent states are $\{S_1, S_2, S_3, S_4, S_5, S_6, S_7, S_8, S_9, S_{10}, S_{11}, S_{12}\}$. Sequences based on $k_i$ have equal probability $\frac{1}{3}$, meaning, that for example for $k_1$: A, AA, AAA have the same probability $\frac{1}{3}$.
-The transition matrix has for elements the probabilities indicated on the graph and $\sum_{j} A_{ij}=1$.
+The HMM model is defined by three class of parameters $\{\matr{A}, \matr{B}, \pi \}$.
+If we call $\{S_1, S_2\}$ the latent states.  For a observation sequence $A^{k_1}C^{k_2}A^{k_3}C^{k_4}$ the transition matrix $\matr{A}$ is computed so that $$a_{ij} = \frac{num\ state\ transitions\ from\ i\ to\ j}{num\ state\ transitions\ from\ i}$$
+\begin{align*}
+	A_{11} &= \frac{k_1 -1 + k_3 -1} {k_1-1 + k_3-1 +2} = \frac{k_1 + k_3 -2} {k_1 + k_3} \\
+	A_{12} &= \frac{2}{k_1 + k_3} \\
+	A_{21} &= \frac{1}{k_2-1 + 1 + k_4-1} = \frac{1} {k_2 + k_4 -1}\\
+	A_{22} &= \frac{k_2-1 + k_4-1}{k_2 + k_4 -1} = \frac{k_2 + k_4 -2} {k_2 + k_4 -1}
+\end{align*}
 
 $$B_{ih}=\frac{num\ of\ times\ state\ i\ emits\ h}{num\ state\ i}$$
-The emission probabilities $\matr{B}$, is the identity matrix since there are as many observations repeated for A,
-then the number of state $S_i$, and the same for C and $S_j$.
+Since the number of repeats are drawn with equal probabilities, the emission probabilities $\matr{B}$, is the identity matrix since there are as many observations repeated for A,
+then the number of state $S_1$, and the same for C and $S_2$.
 $$\pi_{i}=\frac{num\ of\ chains\ start\ with\ i}{total\ num\ of\ chains}$$
-All the chains start with a sequence of A in $S_1$, the initial distribution is $\pi = [1 0 0 0 0 0 0 0 0 0 0 0]^T$.
+We have only one chain starting with a sequence of A, which implies that we start in $S_1$ and  the initial distribution is $\pi = [1, \, 0]$.
 
 \begin{center}
-	\includegraphics[width=1\linewidth]{figures/problem-2-2.png} 
+	\includegraphics[width=1\linewidth]{figures/problem-2-1.png} 
 \end{center}
 
 
