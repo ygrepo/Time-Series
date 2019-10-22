@@ -78,8 +78,8 @@ def initForwardBackward(X, K, d, N):
     # covariance matrix for the corresponding state.
     # Given the current latent variable state, emission probability is
     # independent of time
-    SIGMA = [np.eye(d) for i in range(K)]
-    gmm = BayesianGaussianMixture(n_components=3, init_params="kmeans", max_iter=1500)
+    SIGMA = [np.eye(d) for _ in range(K)]
+    gmm = BayesianGaussianMixture(n_components=K, init_params="kmeans", max_iter=1500)
     gmm.fit(X.reshape(-1, 1))
     MU = gmm.means_.reshape(1, -1)
     covars = gmm.covariances_.flatten()
@@ -201,7 +201,7 @@ def plot_loss(iter, losses):
     plt.show()
 
 
-def plot_gaussian(data, means, covars, ax, title):
+def plot_gaussian(data, K, means, covars, ax, title):
     ind = means.argsort()[-3:][::-1]
     means = means[ind]
     print("Mean={}".format(means))
@@ -209,17 +209,18 @@ def plot_gaussian(data, means, covars, ax, title):
     print("Covars={}".format(covars))
     x1 = np.linspace(means[0] - 2 * covars[0], means[0] + 2 * covars[0], 100)
     x2 = np.linspace(means[1] - 2 * covars[1], means[1] + 2 * covars[1], 100)
-    x3 = np.linspace(means[2] - 2 * covars[2], means[2] + 2 * covars[2], 100)
     sns.distplot(data, bins=50, ax=ax, kde=True)
     ax.plot(x1, norm.pdf(x1, means[0], covars[0]), ".", color="grey")
     ax.plot(x2, norm.pdf(x2, means[1], covars[1]), ".", color="blue")
-    ax.plot(x3, norm.pdf(x3, means[2], covars[2]), ".", color="red")
+    if K == 3:
+        x3 = np.linspace(means[2] - 2 * covars[2], means[2] + 2 * covars[2], 100)
+        ax.plot(x3, norm.pdf(x3, means[2], covars[2]), ".", color="red")
     ax.set_xlabel("")
     ax.set_ylabel("Density")
     ax.set_title(title)
 
 
-def plot_results(data, means, covars, ref_means, ref_covars, ref_title):
+def plot_results(data, K, means, covars, ref_means, ref_covars, ref_title):
     ind = means.argsort()[-3:][::-1]
     means = means[ind]
     covars = covars[ind]
@@ -227,8 +228,8 @@ def plot_results(data, means, covars, ref_means, ref_covars, ref_title):
     fig, ax = plt.subplots(2, 1, sharex=True, figsize=(15, 8))
     fig.subplots_adjust(hspace=0.2)
 
-    plot_gaussian(data, means, covars, ax[0], "MY HMM Model")
-    plot_gaussian(data, ref_means, ref_covars, ax[1], ref_title)
+    plot_gaussian(data, K, means, covars, ax[0], "MY HMM Model")
+    plot_gaussian(data, K, ref_means, ref_covars, ax[1], ref_title)
     plt.xlabel("S&P500 Weekly Returns")
     sns.despine()
     plt.show()
@@ -243,7 +244,7 @@ def main():
     trainSet = allData.T
 
     # Setting up total number of clusters which will be fixed
-    K = 3
+    K = 2
 
     # Initialization: Build a state transition matrix with uniform probability
     A, PI, MU, SIGMA = initForwardBackward(trainSet, K, n, m)
@@ -272,7 +273,7 @@ def main():
 
     plot_loss(iter, losses)
 
-    print("PI={}".format(PI))
+    print("PI={}".format(PI.flatten()))
     print("A={}".format(A))
     print("MU={}".format(MU))
     print("SIGMA={}".format(SIGMA))
@@ -282,14 +283,14 @@ def main():
 
     ref_means = np.array([0.004, -0.34, -0.003])
     ref_covars = np.array([.014, .009, .044])
-    plot_results(data, MU.flatten(), sigmas, ref_means, np.sqrt(ref_covars), "TSA4 Reference Curves")
+    plot_results(data, K, MU.flatten(), sigmas, ref_means, np.sqrt(ref_covars), "TSA4 Reference Curves")
 
-    model = hmm.GaussianHMM(n_components=3, covariance_type="full", n_iter=2000)
+    model = hmm.GaussianHMM(n_components=K, covariance_type="full", n_iter=2000)
     model.fit(allData)
     print("A={}".format(model.transmat_))
     ref_means = model.means_.flatten()
     ref_covars = model.covars_.flatten()
-    plot_results(data, MU.flatten(), sigmas, ref_means, np.sqrt(ref_covars), "HMMLearn Gaussian Estimations")
+    plot_results(data, K, MU.flatten(), sigmas, ref_means, np.sqrt(ref_covars), "HMMLearn Gaussian Estimations")
 
 
 if __name__ == '__main__':
