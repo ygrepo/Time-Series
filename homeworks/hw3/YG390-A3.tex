@@ -118,9 +118,9 @@ For the parameters initialization:
 \begin{enumerate}
 	\item We use a gaussian mixture which gives us estimates for the mean and the covariance of each components namely $\mu_k$ and $\Sigma_k$ from
 the handout.
-	\item  The initial distribution of the initial state $\vect{z}_1$, $\vect{\pi}$ is estimated by implementing an expectation step on the data itself and computing $\pi=\p{\vect{z}_1|\vect{x}_1}$. 
-	\item Based on the KMeans algorithm that we implemented, we obtain a label for every point of the dataset. We then use this labeling to approximate the initial transition matrix, by counting the number of transition among labels 
-and normalizing the frequencies.
+	\item  The initial distribution of the initial state $\vect{z}_1$, $\pi=\p{\vect{z}_1|\vect{x}_1}$ is estimated using an expectation-maximization algorithm with the dataset and fitting the parameters of a gaussian distribution.
+	\item Based on the KMeans algorithm that we implemented, we obtain a label for every point of the dataset. We then use this labeling to approximate the initial transition matrix, by counting the number of transitions among labels 
+and normalizing the frequencies so each row of the transition matrix sum up to one.
 \end{enumerate}
 
 This is the plot of the S\&P 500 returns over many years with estimated labels:
@@ -155,14 +155,14 @@ indicated by ts4 textbook.  We can see that our model, to some extent, captures 
 	\includegraphics[width=1\linewidth]{figures/problem-3-3.png} 
 \end{center}
 
-The performance of our model compared to hmmlearn Gaussian smoother,  are similar, the GaussianHMM model covering more of the data along the x-axis whereas our model covers the
+The performance of our model compared to the hmmlearn Gaussian estimator (GaussianHMM),  are similar, the GaussianHMM model covering more of the data along the x-axis whereas our model covers the
 distribution better along the y-axis.
 \begin{center}
 	\includegraphics[width=1\linewidth]{figures/problem-3-4.png} 
 \end{center}
 
-For $K=2$, the fit is worst but we can see that tsa4 model does not cover the distribution along the y-axis. 
-Compared to hmmlearn gaussian model, our model performance is very similar.
+For $K=2$, the fit is worst but we can see that, unlike our model, the "tsa4" model does not cover the distribution along the y-axis. 
+Compared to the hmmlearn gaussian model (GaussianHMM), our model performance is very similar.
 
 \begin{center}
 	\includegraphics[width=1\linewidth]{figures/problem-3-5.png} 
