@@ -17,6 +17,7 @@ import seaborn as sns
 from hmmlearn import hmm
 from scipy.stats import norm
 from sklearn.mixture import BayesianGaussianMixture
+from sklearn.cluster import KMeans
 
 import homeworks.hw3.distributions as distributions
 import homeworks.hw3.em as em
@@ -49,6 +50,17 @@ def normPDF(x, mu, sigma):
         raise NameError("The dimensions of the input don't match")
         return -1
 
+def init_trans_mat(K, X):
+    kmeans = KMeans(n_clusters=K)
+    X = X.T
+    kmeans.fit(X)
+    A = np.ones((K, K))
+    prev = kmeans.labels_[0]
+    for i in range(1, kmeans.labels_.shape[0]):
+        A[prev, kmeans.labels_[i]] += 1
+        prev = kmeans.labels_[i]
+    A /= np.sum(A, axis=1)[None].T
+    return A
 
 def initForwardBackward(X, K, d, N):
     np.random.seed(0)
@@ -56,8 +68,9 @@ def initForwardBackward(X, K, d, N):
     # element A_{jk} = p(Z_n = k | Z_{n-1} = j)
     # Therefore, the matrix will be row-wise normalized. IOW, Sum(Row) = 1  
     # State transition probability is time independent.
-    A = np.ones((K, K))
-    A = A / np.sum(A, 1)[None].T
+    #A = np.ones((K, K))
+    #A = A / np.sum(A, 1)[None].T
+    A = init_trans_mat(K, X)
 
     # Initialize the marginal probability for the first hidden variable
     # It is a Kx1 vector
@@ -192,7 +205,7 @@ def Mstep(X, Gamma, Xi):
 
 
 def plot_loss(iter, losses):
-    fig, ax = plt.subplots(figsize=(7, 6))
+    fig, ax = plt.subplots(figsize=(6, 5))
 
     ax.set_xlabel("Iteration")
     ax.set_ylabel("Log Likelihood of Data")
@@ -228,7 +241,7 @@ def plot_results(data, K, means, covars, ref_means, ref_covars, ref_title):
     fig, ax = plt.subplots(2, 1, sharex=True, figsize=(15, 8))
     fig.subplots_adjust(hspace=0.2)
 
-    plot_gaussian(data, K, means, covars, ax[0], "MY HMM Model")
+    plot_gaussian(data, K, means, covars, ax[0], "Our HMM Model")
     plot_gaussian(data, K, ref_means, ref_covars, ax[1], ref_title)
     plt.xlabel("S&P500 Weekly Returns")
     sns.despine()

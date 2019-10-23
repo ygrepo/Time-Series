@@ -113,8 +113,20 @@ Implement EM for an HMM model with K states and gaussian observations (full deri
 Use this code to fit the weekly S\&P 500 returns data (data/sp500w.csv) for K = 2 vs. K = 3 and compare the two results. \\
 Hint: Use Example 6.17 from tsa4 textbook as guideline for plots and interpretation.
 
-For the parameters initialization, we use a gaussian mixture which gives us estimates for the mean and the covariance of each components namely $\mu_k$ and $\Sigma_k$ from
-the handout. The initial distribution of the initial state $\vect{z}_1$, $\vect{\pi}$ is estimated by implementing an Expectation step on the data itself and estimating $\pi=\p{\vect{z}_1|\vect{x}_1}$. 
+
+For the parameters initialization:
+\begin{enumerate}
+	\item We use a gaussian mixture which gives us estimates for the mean and the covariance of each components namely $\mu_k$ and $\Sigma_k$ from
+the handout.
+	\item  The initial distribution of the initial state $\vect{z}_1$, $\vect{\pi}$ is estimated by implementing an expectation step on the data itself and computing $\pi=\p{\vect{z}_1|\vect{x}_1}$. 
+	\item Based on the KMeans algorithm that we implemented, we obtain a label for every point of the dataset. We then use this labeling to approximate the initial transition matrix, by counting the number of transition among labels 
+and normalizing the frequencies.
+\end{enumerate}
+
+This is the plot of the S\&P 500 returns over many years with estimated labels:
+\begin{center}
+	\includegraphics[width=1\linewidth]{figures/problem-3-1.png} 
+\end{center}
 
 Once the initialization is completed, we alternate between the E steps, for which we run the alpha-beta algorithm with the current estimates, determining:
 \begin{align*}
@@ -136,20 +148,21 @@ The result for $K=3$, are plotted below with the top plot showing the log loss o
 indicated by ts4 textbook.  We can see that our model, to some extent, captures better the distribution of the raw data.
 
 \begin{center}
-	\includegraphics[width=1\linewidth]{figures/problem-3-1.png} 
+	\includegraphics[width=1\linewidth]{figures/problem-3-2.png} 
 \end{center}
 
 \begin{center}
-	\includegraphics[width=1\linewidth]{figures/problem-3-2.png} 
+	\includegraphics[width=1\linewidth]{figures/problem-3-3.png} 
 \end{center}
 
 The performance of our model compared to hmmlearn Gaussian smoother,  are similar, the GaussianHMM model covering more of the data along the x-axis whereas our model covers the
 distribution better along the y-axis.
 \begin{center}
-	\includegraphics[width=1\linewidth]{figures/problem-3-3.png} 
+	\includegraphics[width=1\linewidth]{figures/problem-3-4.png} 
 \end{center}
 
-For $K=2$, the fit is worst but we can see that tsa4 model does not cover the distribution along the y-axis. Compared to hmmlearn gaussian model, our model performance is very similar.
+For $K=2$, the fit is worst but we can see that tsa4 model does not cover the distribution along the y-axis. 
+Compared to hmmlearn gaussian model, our model performance is very similar.
 
 \begin{center}
 	\includegraphics[width=1\linewidth]{figures/problem-3-5.png} 
@@ -159,10 +172,8 @@ For $K=2$, the fit is worst but we can see that tsa4 model does not cover the di
 	\includegraphics[width=1\linewidth]{figures/problem-3-6.png} 
 \end{center}
 
-Lastly, the log loss for $K=2$ is increasing similarly to the log loss obtained for $K=3$:
-
 \begin{center}
-	\includegraphics[width=1\linewidth]{figures/problem-3-4.png} 
+	\includegraphics[width=1\linewidth]{figures/problem-3-7.png} 
 \end{center}
 
 \end{document}
