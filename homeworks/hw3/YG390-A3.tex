@@ -114,7 +114,7 @@ Use this code to fit the weekly S\&P 500 returns data (data/sp500w.csv) for K = 
 Hint: Use Example 6.17 from tsa4 textbook as guideline for plots and interpretation.
 
 For the parameters initialization, we use a gaussian mixture which gives us estimates for the mean and the covariance of each components namely $\mu_k$ and $\Sigma_k$ from
-the handout. The initial distribution of the initial state $\vect{z}_1$, $\vect{\pi}$ is estimated by implementing an E-M step on the data itself and estimating $\p{\vect{z}_1|\vect{x}_1}$. 
+the handout. The initial distribution of the initial state $\vect{z}_1$, $\vect{\pi}$ is estimated by implementing an Expectation step on the data itself and estimating $\pi=\p{\vect{z}_1|\vect{x}_1}$. 
 
 Once the initialization is completed, we alternate between the E steps, for which we run the alpha-beta algorithm with the current estimates, determining:
 \begin{align*}
