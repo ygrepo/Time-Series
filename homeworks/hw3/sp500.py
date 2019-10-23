@@ -71,7 +71,7 @@ class MyHMM:
         for i in range(len(centers)):
             self.means_[i] = centers[i].mean
         self.startprob_ = pi
-        gmm = BayesianGaussianMixture(_components=3, init_params="kmeans", max_iter=1500)
+        gmm = BayesianGaussianMixture(n_components=3, init_params="kmeans", max_iter=1500)
         gmm.fit(data.reshape(-1, 1))
         self.means_ = gmm.means_.flatten()
         # self.covars_ = gmm.covariances_.flatten()
@@ -250,8 +250,8 @@ def plot_gaussian(data, model, num_states=3):
 if __name__ == "__main__":
     data = read_data()
 
-    # model, data = create_model(data, ModelType.MYHMM, num_states=3)
-    model, data = create_model(data, ModelType.GAUSSHMM, num_states=3)
+    model, data = create_model(data, ModelType.MYHMM, num_states=3)
+    #model, data = create_model(data, ModelType.GAUSSHMM, num_states=3)
     model.fit(data)
     plot_gaussian(data, model, num_states=3)
     # print(model.monitor_.converged)
