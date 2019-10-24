@@ -92,21 +92,17 @@ Based on the transition matrix $\matr{A}$ then the only possible state sequences
 \noindent \textbf{Problem 2.} (15p)\\
 Construct an HMM that generates the observation sequence $A^{k_1}C^{k_2}A^{k_3}C^{k_4}$ where $A^{k_1}$ denotes $k_1$ repeats of symbol $A$ and the number of repeats $k_i$ are drawn from the set $\{1,2,3\}$ with equal probability.\\
 
-The HMM model is defined by three class of parameters $\{\matr{A}, \matr{B}, \pi \}$, and is described in the graph below. Note that there is a direct connection between the states STOP\_k2 and S\_7 which I broke down into two for convenience of
-representation.
-The latent states are $\{S_1, S_2, S_3, S_4, S_5, S_6, S_7, S_8, S_9, S_{10}, S_{11}, S_{12}\}$. Sequences based on $k_i$ have equal probability $\frac{1}{3}$, meaning, that for example for $k_1$: A, AA, AAA have the same probability $\frac{1}{3}$.
+The HMM model is defined by three class of parameters $\{\matr{A}, \matr{B}, \pi \}$, and is described in the graph below. The latent states are $\{S_1, S_2, S_3, S_4, S_5, S_6, S_7, S_8, S_9, S_{10}, S_{11}, S_{12}, STOP\}$
+Note that there is a direct connection between the states S\_4,S\_5, S\_6 and S\_7 which I broke down into two for convenience of representation.
+Sequences based on $k_i$ have equal probability: $\frac{1}{3}$, meaning, that for example, for $k_1$: A, AA, AAA have the same probability $\frac{1}{3}$.
 The transition matrix has for elements the probabilities indicated on the graph and $\sum_{j} A_{ij}=1$.
-
-$$B_{ih}=\frac{num\ of\ times\ state\ i\ emits\ h}{num\ state\ i}$$
-The emission probabilities $\matr{B}$, is the identity matrix since there are as many observations repeated for A,
-then the number of state $S_i$, and the same for C and $S_j$.
-$$\pi_{i}=\frac{num\ of\ chains\ start\ with\ i}{total\ num\ of\ chains}$$
-All the chains start with a sequence of A in $S_1$, the initial distribution is $\pi = [1 0 0 0 0 0 0 0 0 0 0 0]^T$.
+The emission probabilities $\matr{B}$, are deterministic. All the chains start with A in $S_1$, the initial distribution is $\pi = [1 0 0 0 0 0 0 0 0 0 0 0 0]^T$.
 
 \begin{center}
 	\includegraphics[width=1\linewidth]{figures/problem-2-2.png} 
 \end{center}
-
+ There is a way to avoid the STOP state by linking the last A to either the first C of the last sequence or the last C of the last sequence, and repeating the same for the first C of the last sequence of Cs.
+ But it was mentioned that a STOP state is an acceptable solution.
 
 \noindent \textbf{Problem 3.}  (20p)\\ 
 Implement EM for an HMM model with K states and gaussian observations (full derivations in handout). 
