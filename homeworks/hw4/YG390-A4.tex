@@ -1,0 +1,203 @@
+\documentclass[12pt]{article}
+
+\usepackage[a4paper,margin=0.5in]{geometry}
+
+\usepackage[square,numbers,sort&compress]{natbib}
+%\usepackage[sort&compress]{natbib}
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+
+\usepackage{times}
+\usepackage[psamsfonts]{amssymb}
+\usepackage{latexsym}
+\usepackage{color}
+\usepackage{graphics}
+\usepackage{enumerate}
+\usepackage{amstext}
+\usepackage{blkarray}
+\usepackage{url}
+\usepackage{epsfig}
+\usepackage{bm}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=blue,
+}
+\usepackage{mathtools}
+
+
+\usepackage{graphicx}
+\DeclareMathOperator*{\E}{\rm E}
+
+
+\newcommand{\bigo}[1]{{\cal O}\left(#1 \right)}
+\newcommand{\p}{\mathrm{P}}
+\newcommand{\vect}[1]{\bm{#1}} % vectors
+\newcommand{\matr}[1]{\bm{#1}} % matrices and tensors
+
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\Covar}{\mathrm{Covar}}
+\newcommand{\tr}{^\top}
+\begin{document}
+\thispagestyle{empty}
+\begin{center}
+
+\textbf{DS-GA 3001.001 Special Topics in Data Science: Probabilistic Time Series Analysis\\
+Homework 4}
+\end{center}
+
+\noindent \textbf{Due date: Nov  22}\\
+\noindent YG390\\
+
+
+\noindent \textbf{Problem 1. (15pt)} Which of these objects are a Gaussian process?
+\begin{itemize}
+\item linear combination of 2 GPs: $f(x) = a f_1(x) + b f_2(x)$ where $f_i \sim \mathcal{GP}(\mu_i(x); k_i(x,y))$ (independent) and $a,\, b$ are fixed parameters.
+The distribution of the sum of the functions due to linearity of Gaussian distributions is simply another $\mathcal{GP}$: $ f(x) \sim  \mathcal{GP}(\mu_1(x) + \mu_2(x); k_1(x,y) + k_2(x,y))$
+
+\item random linear: $ f(x) = a x + w$ where $a \sim \mathcal{N}(0,\sigma_a^2)$, $w\sim \mathcal{N}(0,\sigma_w^2)$.
+We consider two fixed $x_1$ and $x_2$ and note that the two random variables $f(x_1)$ and $f(x_2)$ are jointly Gaussian.
+\begin{align*}
+	\E[f(x_i)]			&=	\E[a x_i + w] \\
+					&= 	x_i \E[a] + \E[w] \\
+					&=	0 \\
+	\Var[f(x)]			&=	\Var[ a x + w] \\
+					&= 	x^2 \Var[a] + \Var[w] \\
+					&=	x^2 \sigma_a^2 + \sigma_w^2 \\
+	\Covar[f(x_1),f(x_2)]	&=	\E (a x_1 + w)(a x_2 + w)] \\
+					&=	x_1 x_2 \E[a,a] + \E[w,w]  \\
+					&=	x_1 x_2 \sigma_a^2 + \sigma_w^2			
+\end{align*}
+Let $y_1=f(x_1)$ and $y_2=f(x_2)$, the multivariate gaussian distribution $p(y_1,y_2)$ is:
+
+\[
+p(y_1,y_2) = 
+	\mathcal{N} \Big(
+	\mu = \begin{bmatrix}
+		0 \\
+		0 \\
+	\end{bmatrix}
+	,
+	\Sigma = \begin{bmatrix}
+		x_1^2 \sigma_a^2 + \sigma_w^2 & x_1 x_2 \sigma_a^2 + \sigma_w^2	 \\
+		x_1 x_2 \sigma_a^2 + \sigma_w^2	&  x_2^2 \sigma_a^2 + \sigma_w^2 \\
+	\end{bmatrix}
+	\Big)
+\]	
+
+Thus $ f(x) \sim  \mathcal{GP}(\mu(x_1, x_2); \Sigma(x_1,x_2))$.
+
+\item random periodic: $f(x) = a \cos(wx)+ b \sin(wx)$ with $a \sim \mathcal{N}(0,\sigma^2)$, $b \sim \mathcal{N}(0,\sigma^2)$, w fixed parameter.
+
+Similarly, we have now:
+\begin{align*}
+	\E[f(x_i)]			&=	\E[a \cos(w x_i) + b \sin(w x_i)] \\
+					&= 	\cos(w x_i) \E[a] + \sin(w x_i) \E[b] \\
+					&=	0 \\
+	\Var[f(x)]			&=	\Var[a \cos(wx)+ b \sin(wx)] \\
+					&= 	\cos(wx)^2 \Var[a] + \sin(wx)^2 \Var[w] \\
+					&=	\sigma^2  \\					
+	\Covar[f(x_1),f(x_2)]	&=	\E[ (a \cos(w x_1) + b  \sin(w x_1)) (a \cos(w x_2) + b  \sin(w x_2))] \\
+					&=	\cos(w x_1) \cos(w x_2) \E[a,a] + \sin(w x_1) \sin(w x_2) \E[w,w]  \\
+					&=	\cos(w x_1) \cos(w x_2)  \sigma^2 +  \sin(w x_1) \sin(w x_2) \sigma^2  \\
+					&= 	\sigma^2 \cos(w (x_1 - x_2))		
+\end{align*}
+
+$f(x)$ is a Gaussian process: $ f(x) \sim  \mathcal{GP}(\mu(x_1, x_2); \Sigma(x_1,x_2))$, where $ \mu(x_1, x_2) = \begin{bmatrix}
+		0 \\
+		0 \\
+	\end{bmatrix}$ and $\Sigma =  \begin{bmatrix}
+		\sigma^2	& \sigma^2 \cos(w (x_1 - x_2))	 \\
+		\sigma^2 \cos(w (x_1 - x_2))	&  \sigma^2 \\
+	\end{bmatrix}
+	\Big) $
+
+\end{itemize}
+If yes, then write down the corresponding mean and covariance functions.\\
+
+
+\noindent \textbf{Problem 2. (10pt)} 
+How would you construct a GP-equivalent of an ARIMA (1,2,1) model?\\
+
+\noindent \textbf{Problem 3. (15pt)} 
+Derive the mean and covariance of  $\mathrm{P}(y|\theta)$ for the FITC approximation described in the lecture (this is obtained by marginalizing out $\mathbf{u}$ and $\mathbf{f})$.\\
+%$$\p(\vect{y}|\theta) = \mathcal{N}\left( \mathbf{0},  \mathbf{K}_{fu} \mathbf{K}_{uu}^{-1}\mathbf{K}_{uf}  + \mathbf{D} + \sigma_y^2 \mathbf{I}\right).$$\\
+\noindent \emph{Hint: one can think of the approximate model as a sequence of linear gaussian steps and use the usual simple gaussid.pdf properties.}\\
+
+Given the two factor graphs in the slides of the lecture, $\{y_i\}$ are conditionally independent given  $\{f_i\}$  and depend directly on the $\{f_i\}$ which are conditionally independent  given $\{u_i\}$. 
+The $\vect{u}$ variables summarize the dependencies in $\vect{f}$. Setting $p(\vect{u}) = \mathcal{N}(0,\matr{K_{uu}})$, 
+the conditional distribution $p(f_t|\vect{u}) =  \mathcal{N}(f_t; K_{f_tu} K_{uu}^{-1} \vect{u}, K_{f_tf_t} -  K_{f_tu}  K_{uu}^{-1} K_{uf_t})$.
+
+We have then:
+\begin{align*}
+	\vect{y_t}	&=	\vect{f_t} + \sigma_y \vect{\epsilon} \text{ with } \vect{\epsilon} \sim  \mathcal{N}(\vect{0},\vect{I}) \\
+	\text{ let } D		&=	K_{f_tf_t} -  K_{f_tu}  K_{uu}^{-1} K_{uf_t} \\
+	\vect{f_t}	&= 	 K_{f_tu} K_{uu}^{-1} \vect{u_t} + D \vect{\epsilon'} \text{ with } \vect{\epsilon'} \sim  \mathcal{N}(\vect{0},\vect{I}) \\
+\end{align*}
+$\vect{f_t}$ has 0 mean as it only depends on $\vect{u_t}$  which has 0 mean, the same for $\vect{y_t}$ which depends only on $\vect{f_t}$ with some noise.
+Now:
+\begin{align*}
+	\Covar[\vect{y_t},\vect{y_s}]	&= \E_{\vect{u}, \vect{f}, \vect{\epsilon}}[(\vect{f_t} + \sigma_y \vect{\epsilon}) (\vect{f_s} + \sigma_y \vect{\epsilon})^T]	\\
+							&= \E[\vect{f_t}, \vect{f_s}] + \sigma_y^2 \E[\vect{\epsilon}, \vect{\epsilon}] \\
+							&= \E[\vect{f_t}, \vect{f_s}] +  \sigma_y^2 \vect{I} \\
+	\E[\vect{f_t}, \vect{f_s}] 		&= \E[K_{f_tu} K_{uu}^{-1} \vect{u_t} \vect{u_s} K_{uu}^{-T}K_{uf_s}] + D \E[\vect{\epsilon'}, \vect{\epsilon'}] \\
+							&= K_{f_tu} K_{uu}^{-1} \E[\vect{u_t}, \vect{u_s}]  K_{uu}^{-T}K_{uf_s} + D \vect{I} \\
+							&=  K_{f_tu} K_{uu}^{-1} K_{uu}   K_{uu}^{-1} K_{uf_s} + D \\
+							&= K_{f_tu} K_{uu}^{-1}   K_{uf_s} + D 
+\end{align*}
+Where the cross-terms in the second  and fourth equalities disappear as these terms are mutually independent.
+Thus $$\p(\vect{y}|\theta) = \mathcal{N}\left( \mathbf{0},  \mathbf{K}_{fu} \mathbf{K}_{uu}^{-1}\mathbf{K}_{uf}  + \mathbf{D} + \sigma_y^2 \mathbf{I}\right).$$
+
+\noindent \textbf{Problem 4. (10pt)} 
+What GP-based model would you use for the Johnson\&Johnson quarterly earnings database?
+Explain your choices. Would it matter if the goal of your analysis is to interpolate to account for missing data in the middle of the recorded time interval vs.\ extrapolating a decade into the future?\\
+
+I used a linear combination of squared exponential kernel, linear, polynomial and periodic kernels. 
+I tested the effect of the number of observations (sampling of the data) for the interpolation and forecasting (see ~\ref{problem41}).
+Experimenting with different weighting of the kernels, I found that a mixed of  SE and periodic kernels, captured the best the increasing trend, and some of the wiggles of the time series (see  ~\ref{problem42}).
+The error bars showed that when the observations were sparse the GP model confidence interval increased very rapidly confirming that GP was less confident in its predictions.
+The same combination of kernels for the forecasting task, for different horizons, had a harder time to predict the wiggles of the process in the future (see  ~\ref{problem43}). 
+Note the difference between interpolation when the GP uses neighboring points vs. extrapolating in the future when the only available points are the last observations before the forecasting (backcast). 
+So for interpolating to account for missing data, the best choice could be an SE + linear or polynomial model which takes into account clusters of points and for forecasting an Exp-Sine-Squared  or spectral mixture kernels might be more appropriate
+in an effort to gives weight to close observations, but at same time captures the dynamics of the process.
+In order to improve the overall model performance, I used a spectral mixture kernel which seemed to predict the swings of the data including the ones in the future (see  ~\ref{problem44}).
+
+\begin{figure}
+	\centering
+	\includegraphics[width=1\linewidth]{figures/problem-4-1.png} 
+	\caption{Johnson\&Johnson}
+	\label{problem41}
+\end{figure}
+\begin{figure}
+	\centering
+	\includegraphics[width=1\linewidth]{figures/problem-4-2.png} 
+	\caption{Interpolation using a weighted combinations of kernels}
+	\label{problem42}
+\end{figure}
+\begin{figure}
+	\centering
+	\includegraphics[width=1\linewidth]{figures/problem-4-3.png} 
+	\caption{SE + periodic kernels - Interpolation and Forecasting with error bars}
+	\label{problem43}
+\end{figure}
+\begin{figure}
+	\centering
+	\includegraphics[width=1\linewidth]{figures/problem-4-4.png} 
+	\caption{Spectral Mixture Kernel with confidence intervals - two standard deviations}
+	\label{problem44}
+\end{figure}
+
+
+\end{document}
