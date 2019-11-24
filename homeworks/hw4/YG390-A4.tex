@@ -101,6 +101,7 @@ Thus $ f(x) \sim  \mathcal{GP}(\mu(x_1, x_2); \Sigma(x_1,x_2))$.
 
 \item random periodic: $f(x) = a \cos(wx)+ b \sin(wx)$ with $a \sim \mathcal{N}(0,\sigma^2)$, $b \sim \mathcal{N}(0,\sigma^2)$, w fixed parameter.
 
+"From Professor Savin: for all pairs of variables: if nothing about their dependency structure is explicitly specified, they are independent."
 Similarly, we have now:
 \begin{align*}
 	\E[f(x_i)]			&=	\E[a \cos(w x_i) + b \sin(w x_i)] \\
@@ -130,6 +131,51 @@ If yes, then write down the corresponding mean and covariance functions.\\
 
 \noindent \textbf{Problem 2. (10pt)} 
 How would you construct a GP-equivalent of an ARIMA (1,2,1) model?\\
+
+An ARIMA (1,2,1) model $x_t$ could be defined as the combination of a trend and some noise: $x_t = \mu_t + y_t$ where $\mu_t = \beta_0 + \beta_1 t + \beta_2 t^2$ and $y_t$ is an ARMA(1,1).
+Differencing such process leads to a stationary process: $\Delta^2 x_t = \beta_2 + \Delta^2 y_t $ which is stationary (constant mean), the corresponding GP-equivalent has for mean function 
+$m(.) =  \beta_0 + \beta_1 t + \beta_2 t^2$.
+The ARMA $y_t$ process to be sensible as to be causal and suppose that, $y_t = \phi y_{t-1} + w_t + \theta w_{t-1}$ where $|\phi|<1$ and $w_t \sim \mathcal{N}(0, \sigma_w)$. 
+The autocovariance function satisfies:
+\[
+	\gamma(h) -\phi \gamma(h-1)	= 0, h=2,3,\cdots
+\]
+And the general solution is:
+\[
+	\gamma(h) = c \phi^h, h=1,2,\cdots
+\]
+The initial conditions are 
+\begin{align*}
+	\gamma(0)	&=		\phi \gamma(1) + \sigma_w^2 [1 + \theta \phi + \theta^2] \\
+	\gamma(1)	&=		\phi \gamma(0) + \sigma_w^2 \theta
+\end{align*}
+Solving for $\gamma(0)$ and $\gamma(1)$, we obtain: 
+$$ \gamma(0) = \sigma_w^2 \frac{1 + 2 \theta \phi + \theta^2}{1 - \phi^2} \text{ and } \gamma(1) = \sigma_w^2 \frac{ (1 + \theta \phi) (\theta + \phi)}{1 - \phi^2}$$
+Dividing by $\gamma(0)$ yields:
+\[
+	\rho(h) = \frac{ (1 + \theta \phi)  (\theta + \phi) } {  1 + 2 \theta \phi + \theta^2 } \phi^{h-1}, h \ge 1
+\]
+
+The squared exponential kernel with covariance function is defined as:
+\[
+	k(x_i, x_j) = \sigma^2 \exp{( \frac{- (x_1-x_2)^2 } {2 l^2 }	)}
+\]
+where
+\begin{itemize}
+	\item The length scale $l$ determines the length of the "wiggles". For $x_t$, using $\rho$ as $l$,  the GP process cannot extrapolate more than $\rho$ time steps away:
+	as $x_{t1}$ and $x_{t2}$ are less correlated,  $|\rho|$  tends to zero, the exponential and $k(x_{t1}, x_{t2})$ tend to zero.
+	
+	\item The output variance $\sigma^2$ determines the average distance of your function away from its mean, we use  $\sigma^2 = \gamma(0)$.
+\end{itemize}
+
+The Matérn covariance function is the generalization of the squared exponential kernel and used 
+to define the statistical covariance between measurements made at two points that are d units distant from each other:
+\[
+	C_\nu(d) = \sigma^2 \frac{2^{1-\nu}}{\Gamma(\nu)} \big( \sqrt{2 \nu}	\frac{d}{\rho} \big)^\nu K_{\nu} \big(	\sqrt{2 \nu} \frac{d}{\rho}  \big)
+\]
+Then the process $x_t$ is the discrete time equivalents of Gaussian process models with Matérn covariance function with $\nu = \frac{1}{2}$ and $p=0$.
+ The GP-equivalent of an ARIMA (1,2,1) model is: $ \mathcal{GP}( \beta_0 + \beta_1 t + \beta_2 t^2; \sigma^2 \exp{- (\frac{ |x_1-x_2| } {\rho}}) )$ where $\sigma^2 = \gamma(0)$ 
+ and $\rho$ are given by the expressions above. 
 
 \noindent \textbf{Problem 3. (15pt)} 
 Derive the mean and covariance of  $\mathrm{P}(y|\theta)$ for the FITC approximation described in the lecture (this is obtained by marginalizing out $\mathbf{u}$ and $\mathbf{f})$.\\
@@ -166,13 +212,15 @@ Explain your choices. Would it matter if the goal of your analysis is to interpo
 
 I used a linear combination of squared exponential kernel, linear, polynomial and periodic kernels. 
 I tested the effect of the number of observations (sampling of the data) for the interpolation and forecasting (see ~\ref{problem41}).
-Experimenting with different weighting of the kernels, I found that a mixed of  SE and periodic kernels, captured the best the increasing trend, and some of the wiggles of the time series (see  ~\ref{problem42}).
-The error bars showed that when the observations were sparse the GP model confidence interval increased very rapidly confirming that GP was less confident in its predictions.
+Experimenting with different weighting of the kernels, I found that, a linear combination of  an SE and a periodic kernels captured the best the increasing trend, and some of the wiggles of the time series (see  ~\ref{problem42}).
+The error bars showed that, when the observations were sparse the GP model confidence interval increased very rapidly confirming that,
+ the GP model had larger confidence intervals for its predictions (see  ~\ref{problem42}: third and fourth points and forecasting beyond the last observation ~\ref{problem43}).
 The same combination of kernels for the forecasting task, for different horizons, had a harder time to predict the wiggles of the process in the future (see  ~\ref{problem43}). 
-Note the difference between interpolation when the GP uses neighboring points vs. extrapolating in the future when the only available points are the last observations before the forecasting (backcast). 
-So for interpolating to account for missing data, the best choice could be an SE + linear or polynomial model which takes into account clusters of points and for forecasting an Exp-Sine-Squared  or spectral mixture kernels might be more appropriate
-in an effort to gives weight to close observations, but at same time captures the dynamics of the process.
-In order to improve the overall model performance, I used a spectral mixture kernel which seemed to predict the swings of the data including the ones in the future (see  ~\ref{problem44}).
+Note the difference between interpolation in the middle when the GP uses neighboring points (see  ~\ref{problem42}: third and fourth points), vs. extrapolating in the future 
+when the only available points are the last observations before the forecasting (see  ~\ref{problem43}). 
+So for interpolating to account for missing data, the best choice could be an SE + a linear or polynomial model, which takes into account clusters of points and 
+for forecasting an Exp-Sine-Squared  or a spectral mixture kernels might be more appropriate in an effort to gives weight to clusters of observations, but at the same time, to capture the dynamics of the process.
+Lastly, in order to improve the overall model performance, I used a spectral mixture kernel which seemed to predict the swings of the data including the ones in the future (see  ~\ref{problem44}).
 
 \begin{figure}
 	\centering
