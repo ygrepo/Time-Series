@@ -1,0 +1,99 @@
+\documentclass[12pt]{article}
+
+\usepackage[a4paper,margin=0.5in]{geometry}
+
+\usepackage[square,numbers,sort&compress]{natbib}
+%\usepackage[sort&compress]{natbib}
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+
+\usepackage{times}
+\usepackage[psamsfonts]{amssymb}
+\usepackage{latexsym}
+\usepackage{color}
+\usepackage{graphics}
+\usepackage{enumerate}
+\usepackage{amstext}
+\usepackage{blkarray}
+\usepackage{url}
+\usepackage{epsfig}
+\usepackage{bm}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=blue,
+}
+\usepackage{mathtools}
+
+
+\usepackage{graphicx}
+\DeclareMathOperator*{\E}{\rm E}
+
+
+\newcommand{\bigo}[1]{{\cal O}\left(#1 \right)}
+\newcommand{\p}{\mathrm{P}}
+\newcommand{\vect}[1]{\bm{#1}} % vectors
+\newcommand{\matr}[1]{\bm{#1}} % matrices and tensors
+
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\Covar}{\mathrm{Covar}}
+\newcommand{\tr}{^\top}
+\begin{document}
+\thispagestyle{empty}
+\begin{center}
+
+\textbf{DS-GA 3001.001 Special Topics in Data Science: Probabilistic Time Series Analysis\\
+Homework 5}
+\end{center}
+
+\noindent \textbf{Due date: Dec  13}\\
+\noindent YG390\\
+
+
+\noindent \textbf{Problem 4.6 in tsa4. (15pt)} 
+
+\begin{itemize}
+\item[(a)]
+For $x_t = \phi x_{t-1} + w_t$ where $|\phi|<1$ and $w_t \sim \mathcal{N}(0,\sigma_w^2)$, using the property 4.4 in tsa4; for this AR(1) process, $\theta(z)=1$ and $\phi(z)=1- \phi z$,
+then:
+\begin{align*}
+	|\phi(e^{-2 \pi i w})|^2		&=	|1 - \phi e^{-i 2 \pi w} | ^2  \\
+						&= 	(1-\phi e^{-i 2 \pi w} ) (1-\phi e^{i 2 \pi w} ) \\
+						&= 1 - \phi (e^{-i 2 \pi w} + e^{i 2 \pi w} ) + \phi^2 \\
+						&= 1 +  \phi^2 -2 \phi \cos(2 \pi w)
+\end{align*}
+
+Substituting into (4.23) we have $f_x(w) = \frac{\sigma_w^2} {1 +  \phi^2 -2 \phi \cos(2 \pi w)}$
+
+\item[(b)] Assuming $\gamma_x(h) = \frac{\sigma_w^2 \phi^{|h|}} {1-\phi^2}$ for $h = 0, _{-}^{+}1, _{-}^{+}2,\dots$
+\begin{align*}
+	f_x(w)	&=		\sum_{h=-\infty}^{h=+\infty} \gamma(h) e^{-i 2 \pi w h} \\
+			&=		\frac{\sigma_w^2}  {1-\phi^2} \sum_{h=-\infty}^{h=+\infty} \phi^{|h|} e^{-i 2 \pi w h} \\
+			&= 		\frac{\sigma_w^2}  {1-\phi^2} [1 + \sum_{h=1}^{h=+\infty}  (\phi e^{-i 2 \pi w})^h +  \sum_{h=1}^{h=+\infty}  (\phi e^{i 2 \pi w})^h ] \\
+			&= 		\frac{\sigma_w^2}  {1-\phi^2} [1 + \frac{1} {1 - \phi e^{-i 2 \pi w}} - 1 +  \frac{1} {1 - \phi e^{i 2 \pi w}} - 1 ] \\
+			&=		\frac{\sigma_w^2}  {1-\phi^2} [1 + \frac{\phi e^{-i 2 \pi w}}  {1 - \phi e^{-i 2 \pi w}} + \frac{\phi e^{i 2 \pi w}}  {1 - \phi e^{i 2 \pi w}}] \\
+			&= 		\frac{\sigma_w^2}  {1-\phi^2} \frac{1-\phi^2} {1 +  \phi^2 -2 \phi \cos(2 \pi w)} \\
+			&= 		\frac{\sigma_w^2} {1 +  \phi^2 -2 \phi \cos(2 \pi w)}
+\end{align*}
+where we used in the fourth equality, the convergence of geometric series since $|\phi  e^{-i 2 \pi w}| <1$ and  $|\phi  e^{i 2 \pi w}| <1$.
+And we find the expression of the power spectrum established in (a), confirming the equality for $\gamma_x(h)$.
+
+\end{itemize}
+
+
+
+
+
+\end{document}
